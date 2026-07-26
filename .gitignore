@@ -1,0 +1,9 @@
+# transcripts are large and re-derivable from scripts/extract.py
+transcripts/
+*.vtt
+
+.DS_Store
+__pycache__/
+*.pyc
+node_modules/
+.claude/settings.local.json

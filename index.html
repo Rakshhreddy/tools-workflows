@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>How designers actually work with AI</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<div class="app">
+  <header class="head">
+    <div class="head-row">
+      <p class="lede">
+        <span class="title">How designers actually work with AI.</span>
+        <span class="sub">No two stacks are alike. Ten designers, their real tools, in their own words.</span>
+      </p>
+      <div class="rails">
+        <div class="who" id="who"></div>
+        <div class="who-sub" id="whoSub"></div>
+      </div>
+    </div>
+    <p class="mode" id="mode"></p>
+  </header>
+
+  <main class="canvas-wrap" id="canvasWrap">
+    <svg id="graph" role="img" aria-label="Design tools grouped by workflow stage, sized by how many designers use them">
+      <title>Designer tool landscape</title>
+    </svg>
+    <div class="tip" id="tip" hidden></div>
+  </main>
+
+  <footer class="foot" id="footNote"></footer>
+</div>
+
+<aside class="panel" id="panel" hidden>
+  <button class="panel-close" id="panelClose" aria-label="Close">&times;</button>
+  <div id="panelBody"></div>
+</aside>
+
+<script src="app.js"></script>
+</body>
+</html>

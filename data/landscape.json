@@ -1,0 +1,1297 @@
+{
+  "meta": {
+    "title": "How designers actually work with AI",
+    "note": "Ten designers at nine companies. Every tool, handoff and reason is quoted from a full interview, timestamped to the moment it was said.",
+    "axis": {
+      "from": "explore",
+      "to": "refine",
+      "grounding": "Five phases every one of the six moves through. Danny and Kazden both describe the explore-to-refine spine themselves, Danny at 10:52, Kazden at 10:42. Movement runs both ways."
+    },
+    "stages": [
+      {
+        "id": "gather",
+        "label": "Gather",
+        "blurb": "Signal in, inspiration, customer voice, what was actually said in the room"
+      },
+      {
+        "id": "frame",
+        "label": "Frame",
+        "blurb": "Turn raw signal into something you can act on"
+      },
+      {
+        "id": "explore",
+        "label": "Explore",
+        "blurb": "Go wide and rough, many directions, nothing precious"
+      },
+      {
+        "id": "build",
+        "label": "Build",
+        "blurb": "Make it real in code, against the real design system"
+      },
+      {
+        "id": "ship",
+        "label": "Ship",
+        "blurb": "Out to engineers, stakeholders and production"
+      }
+    ]
+  },
+  "designers": [
+    {
+      "id": "danny",
+      "name": "Danny Williams",
+      "role": "Staff Product Designer",
+      "thesis": "Tools sit on a spectrum. One end is exploring: messy, generative, wide. The other is refining: precise, deliberate, narrow.",
+      "source": {
+        "title": "AI Native Workflow of a Designer at Wealthsimple",
+        "show": "Sneak Peek",
+        "url": "https://www.youtube.com/watch?v=i4y_CKOoL00",
+        "publishedDate": "2026-07"
+      },
+      "companyId": "wealthsimple"
+    },
+    {
+      "id": "kazden",
+      "name": "Kazden Cattapan",
+      "role": "Product Designer",
+      "thesis": "Claude Code is all you need. The terminal is just the interface. The markdown skill files are the magic.",
+      "source": {
+        "title": "How I use Claude Code as a Designer at Shopify",
+        "show": "Sneak Peek",
+        "url": "https://www.youtube.com/watch?v=aVDAhJ3PtLg",
+        "publishedDate": "2026-07"
+      },
+      "companyId": "shopify"
+    },
+    {
+      "id": "clint",
+      "name": "Clint McManaman",
+      "role": "Staff Product Designer",
+      "thesis": "Go friction hunting every week. Do not wait for a PRD. Read the feedback yourself and bring the experiment.",
+      "source": {
+        "title": "AI Native Designer shows his Growth Design Process",
+        "show": "Sneak Peek",
+        "url": "https://www.youtube.com/watch?v=l0FPhTmjX2M",
+        "publishedDate": "2026-07"
+      },
+      "companyId": "givebutter"
+    },
+    {
+      "id": "john",
+      "name": "John Voss",
+      "role": "Head of Design",
+      "thesis": "Automate the background context building, then carry anything AI touched over the finish line yourself.",
+      "source": {
+        "title": "How Notion + Claude makes me a 2x Design Manager",
+        "show": "Sneak Peek",
+        "url": "https://www.youtube.com/watch?v=fi_euwCWXCU",
+        "publishedDate": "2026-04"
+      },
+      "companyId": "descript"
+    },
+    {
+      "id": "claire",
+      "name": "Claire Taylor",
+      "role": "Head of Design",
+      "thesis": "Scrappy on purpose. Barely a design system, one page of pointers to the engineer, then polish it in code yourself.",
+      "source": {
+        "title": "Designer at Early Stage Startup Shows Her Workflow",
+        "show": "Sneak Peek",
+        "url": "https://www.youtube.com/watch?v=6PQAykmiZUA",
+        "publishedDate": "2026-04"
+      },
+      "companyId": "chronicle"
+    },
+    {
+      "id": "jennifer",
+      "name": "Jennifer Spriggs",
+      "role": "Staff Product Designer",
+      "thesis": "Learn Git. Branches are how you hold variants, and one link with a switcher beats four links.",
+      "source": {
+        "title": "AI Design Process at CNN",
+        "show": "Sneak Peek",
+        "url": "https://www.youtube.com/watch?v=6AdnanaZMPU",
+        "publishedDate": "2026-07"
+      },
+      "companyId": "cnn"
+    },
+    {
+      "id": "andy",
+      "companyId": "eso",
+      "name": "Andy McClelland",
+      "role": "Product Designer",
+      "thesis": "Discovery first. Speeding up in the wrong direction is still a waste.",
+      "source": {
+        "title": "How I do AI Prototyping as a Designer in Healthcare",
+        "show": "Sneak Peek",
+        "url": "https://www.youtube.com/watch?v=Fc_C5s_PEB4",
+        "publishedDate": "2026-06"
+      }
+    },
+    {
+      "id": "karl",
+      "companyId": "duckduckgo",
+      "name": "Karl Koch",
+      "role": "Design Engineer",
+      "thesis": "A deliberately tiny stack. Figma is a scratchpad, and 80 percent of the work happens in Cursor.",
+      "source": {
+        "title": "Design Engineer at DuckDuckGo Shows His Workflow",
+        "show": "Sneak Peek",
+        "url": "https://www.youtube.com/watch?v=yfh4MWB78jY",
+        "publishedDate": "2026-06"
+      }
+    },
+    {
+      "id": "christina",
+      "companyId": "descript",
+      "name": "Christina Kim",
+      "role": "Senior Designer",
+      "thesis": "Pick the tool by what you need to learn: speed, polish, or design system accuracy.",
+      "source": {
+        "title": "How I Vibe Code as a Designer using AI Tools at Descript",
+        "show": "Sneak Peek",
+        "url": "https://www.youtube.com/watch?v=1qVWJeI9Yec",
+        "publishedDate": "2026-03"
+      }
+    },
+    {
+      "id": "henry",
+      "companyId": "perplexity",
+      "name": "Henry Modisett",
+      "role": "VP of Design",
+      "thesis": "Write the document first. Visuals too early become a rabbit hole before the mechanics are settled.",
+      "source": {
+        "title": "Why Designers at Perplexity skip Figma to design directly in code",
+        "show": "Sneak Peek",
+        "url": "https://www.youtube.com/watch?v=4soEK3BkBmI",
+        "publishedDate": "2026-05"
+      }
+    }
+  ],
+  "tools": [
+    {
+      "id": "mobbin",
+      "name": "Mobbin",
+      "axis": 0.06,
+      "kind": "inspiration",
+      "stage": "gather"
+    },
+    {
+      "id": "granola",
+      "name": "Granola",
+      "axis": 0.1,
+      "kind": "research",
+      "stage": "gather"
+    },
+    {
+      "id": "enterpret",
+      "name": "Enterpret",
+      "axis": 0.13,
+      "kind": "research",
+      "stage": "gather"
+    },
+    {
+      "id": "hex",
+      "name": "Hex",
+      "axis": 0.15,
+      "kind": "research",
+      "stage": "gather"
+    },
+    {
+      "id": "notion",
+      "name": "Notion",
+      "axis": 0.22,
+      "kind": "thinking",
+      "stage": "frame"
+    },
+    {
+      "id": "figjam",
+      "name": "FigJam",
+      "axis": 0.25,
+      "kind": "thinking",
+      "stage": "frame"
+    },
+    {
+      "id": "claude",
+      "name": "Claude",
+      "axis": 0.3,
+      "kind": "thinking",
+      "stage": "frame"
+    },
+    {
+      "id": "figma",
+      "name": "Figma",
+      "axis": 0.4,
+      "kind": "canvas",
+      "stage": "explore"
+    },
+    {
+      "id": "paper",
+      "name": "Paper",
+      "axis": 0.36,
+      "kind": "canvas",
+      "stage": "explore"
+    },
+    {
+      "id": "claudedesign",
+      "name": "Claude Design",
+      "axis": 0.34,
+      "kind": "canvas",
+      "stage": "explore"
+    },
+    {
+      "id": "voice",
+      "name": "Voice dictation",
+      "axis": 0.28,
+      "kind": "input",
+      "stage": "frame"
+    },
+    {
+      "id": "claudecode",
+      "name": "Claude Code",
+      "axis": 0.62,
+      "kind": "agent",
+      "stage": "build"
+    },
+    {
+      "id": "cursor",
+      "name": "Cursor",
+      "axis": 0.64,
+      "kind": "agent",
+      "stage": "build"
+    },
+    {
+      "id": "magicpatterns",
+      "name": "Magic Patterns",
+      "axis": 0.6,
+      "kind": "agent",
+      "stage": "build"
+    },
+    {
+      "id": "conductor",
+      "name": "Conductor",
+      "axis": 0.7,
+      "kind": "agent",
+      "stage": "build"
+    },
+    {
+      "id": "playground",
+      "name": "Playground",
+      "axis": 0.74,
+      "kind": "internal",
+      "stage": "build"
+    },
+    {
+      "id": "storybook",
+      "name": "Storybook",
+      "axis": 0.76,
+      "kind": "system",
+      "stage": "build"
+    },
+    {
+      "id": "git",
+      "name": "Git",
+      "axis": 0.82,
+      "kind": "ship",
+      "stage": "ship"
+    },
+    {
+      "id": "screenrec",
+      "name": "Screen recording",
+      "axis": 0.92,
+      "kind": "share",
+      "stage": "ship"
+    },
+    {
+      "id": "slack",
+      "name": "Slack",
+      "axis": 0.98,
+      "kind": "share",
+      "stage": "ship"
+    },
+    {
+      "id": "miro",
+      "name": "Miro",
+      "axis": 0.24,
+      "kind": "thinking",
+      "stage": "frame"
+    },
+    {
+      "id": "chatgpt",
+      "name": "ChatGPT",
+      "axis": 0.3,
+      "kind": "thinking",
+      "stage": "frame"
+    },
+    {
+      "id": "figmamake",
+      "name": "Figma Make",
+      "axis": 0.44,
+      "kind": "canvas",
+      "stage": "explore"
+    },
+    {
+      "id": "replit",
+      "name": "Replit",
+      "axis": 0.61,
+      "kind": "agent",
+      "stage": "build"
+    }
+  ],
+  "uses": [
+    {
+      "toolId": "mobbin",
+      "designerId": "danny",
+      "purpose": "UI patterns, deliberately from outside finance, Suno, Spotify, Apple Music",
+      "at": 772
+    },
+    {
+      "toolId": "mobbin",
+      "designerId": "kazden",
+      "purpose": "Mood board where he highlights the exact element that applies, so people and agents both know what he meant",
+      "at": 152
+    },
+    {
+      "toolId": "mobbin",
+      "designerId": "claire",
+      "purpose": "Inspiration for designing templates inside her own product",
+      "at": 888
+    },
+    {
+      "toolId": "granola",
+      "designerId": "clint",
+      "purpose": "Always recording. He pings it later, what did so-and-so say about friction at signup?",
+      "at": 641
+    },
+    {
+      "toolId": "granola",
+      "designerId": "claire",
+      "purpose": "Every single conversation, especially jam sessions with the team",
+      "at": 948
+    },
+    {
+      "toolId": "enterpret",
+      "designerId": "clint",
+      "purpose": "The emotional texture behind a problem, voice of the customer across Intercom, Gong and G2",
+      "at": 400
+    },
+    {
+      "toolId": "hex",
+      "designerId": "clint",
+      "purpose": "What users actually do, to check whether the feelings show up in behaviour",
+      "at": 307
+    },
+    {
+      "toolId": "hex",
+      "designerId": "clint",
+      "purpose": "Queried from a Slack channel called talk-to-data, so the whole team sees the answers",
+      "at": 1009
+    },
+    {
+      "toolId": "notion",
+      "designerId": "john",
+      "purpose": "Agents that draft 1:1 agendas, roll up each designer's week, and track his own progress",
+      "at": 251
+    },
+    {
+      "toolId": "notion",
+      "designerId": "john",
+      "purpose": "Explicit permission to skip an update if nothing meaningful happened, no filling space with nonsense",
+      "at": 1333
+    },
+    {
+      "toolId": "notion",
+      "designerId": "claire",
+      "purpose": "Calendar, plus a cheat-sheet doc of everything an engineer ever told her about setting up servers",
+      "at": 828
+    },
+    {
+      "toolId": "figjam",
+      "designerId": "kazden",
+      "purpose": "Sketch board of boxy diagrams next to curated, highlighted screenshots",
+      "at": 122
+    },
+    {
+      "toolId": "figjam",
+      "designerId": "john",
+      "purpose": "Weekly team meeting, great for conversation, bad for documentation",
+      "at": 498
+    },
+    {
+      "toolId": "figjam",
+      "designerId": "danny",
+      "purpose": "Weekly Monday sync, visual rather than a talking head round the room",
+      "at": 496
+    },
+    {
+      "toolId": "claude",
+      "designerId": "claire",
+      "purpose": "Talks to it more than her partner, ideas and feedback on whatever she's working on",
+      "at": 858
+    },
+    {
+      "toolId": "claude",
+      "designerId": "clint",
+      "purpose": "Turns raw meeting transcripts into the prompts he'll take back into Enterpret",
+      "at": 430
+    },
+    {
+      "toolId": "claude",
+      "designerId": "john",
+      "purpose": "Summarises a FigJam board into something readable, a true summary, not raw export",
+      "at": 591
+    },
+    {
+      "toolId": "figma",
+      "designerId": "danny",
+      "purpose": "Catalogue references, annotate them, and draw interaction concepts with the pen tool",
+      "at": 742
+    },
+    {
+      "toolId": "figma",
+      "designerId": "clint",
+      "purpose": "One file per quarter for the whole team, still where everything lands and the conversation happens",
+      "at": 1625
+    },
+    {
+      "toolId": "figma",
+      "designerId": "claire",
+      "purpose": "A tidy mess. Just enough components, then a single page with pointers for the engineer",
+      "at": 553
+    },
+    {
+      "toolId": "figma",
+      "designerId": "jennifer",
+      "purpose": "Projects used to begin and end here, now it holds the map of which branch is which variant",
+      "at": 733
+    },
+    {
+      "toolId": "figma",
+      "designerId": "kazden",
+      "purpose": "Occasionally screenshots back out to combine things on a canvas, then returns to code",
+      "at": 1592
+    },
+    {
+      "toolId": "figma",
+      "designerId": "john",
+      "purpose": "File activity and comments are one of the sources his weekly agent reads",
+      "at": 375
+    },
+    {
+      "toolId": "claudedesign",
+      "designerId": "danny",
+      "purpose": "Go wide fast when precise details don't matter yet, import the design system, get interactive concepts",
+      "at": 3120
+    },
+    {
+      "toolId": "paper",
+      "designerId": "danny",
+      "purpose": "Co-design with Claude on a canvas where everything already is HTML and CSS",
+      "at": 3551
+    },
+    {
+      "toolId": "paper",
+      "designerId": "danny",
+      "purpose": "Deliberately works without the design system to find patterns he'd otherwise miss",
+      "at": 3897
+    },
+    {
+      "toolId": "figma",
+      "designerId": "claire",
+      "purpose": "Quick prototypes alongside classic Figma prototyping",
+      "at": 918
+    },
+    {
+      "toolId": "voice",
+      "designerId": "danny",
+      "purpose": "Wispr Flow, mapped to a mouse button, press and talk instead of typing the prompt",
+      "at": 1110
+    },
+    {
+      "toolId": "voice",
+      "designerId": "clint",
+      "purpose": "Monologue, holds a key and rambles then asks for it back as a structured prompt",
+      "at": 1285
+    },
+    {
+      "toolId": "claudecode",
+      "designerId": "danny",
+      "purpose": "Always starts in plan mode, almost never one-shots it",
+      "at": 2562
+    },
+    {
+      "toolId": "claudecode",
+      "designerId": "danny",
+      "purpose": "Runs a code review skill that spins off eight sub-agents before tagging an engineer",
+      "at": 2935
+    },
+    {
+      "toolId": "claudecode",
+      "designerId": "kazden",
+      "purpose": "Markdown skill files build a brain graph of a project that grows with you",
+      "at": 3366
+    },
+    {
+      "toolId": "claudecode",
+      "designerId": "kazden",
+      "purpose": "Several tabs on different parts at once, never two on the same thing",
+      "at": 1716
+    },
+    {
+      "toolId": "claudecode",
+      "designerId": "clint",
+      "purpose": "Invent things that don't exist yet, free of design-system constraints",
+      "at": 1809
+    },
+    {
+      "toolId": "claudecode",
+      "designerId": "john",
+      "purpose": "Scheduled webhooks and triggers to run the summarising tasks in the background",
+      "at": 653
+    },
+    {
+      "toolId": "cursor",
+      "designerId": "jennifer",
+      "purpose": "Real drag-and-drop micro-interactions in minutes that took hours in Figma",
+      "at": 243
+    },
+    {
+      "toolId": "cursor",
+      "designerId": "jennifer",
+      "purpose": "Socratic prompting, asks the model what her prompt should be, in read-only ask mode",
+      "at": 1291
+    },
+    {
+      "toolId": "cursor",
+      "designerId": "jennifer",
+      "purpose": "Saved commands, so a repeated instruction becomes a one-word action",
+      "at": 1415
+    },
+    {
+      "toolId": "cursor",
+      "designerId": "claire",
+      "purpose": "Lives in ask mode, highlights code and asks what it does, to learn the codebase",
+      "at": 767
+    },
+    {
+      "toolId": "cursor",
+      "designerId": "john",
+      "purpose": "Applied a whole new brand to the live product to show the vision, then had the agent scope the work",
+      "at": 1551
+    },
+    {
+      "toolId": "magicpatterns",
+      "designerId": "clint",
+      "purpose": "Refine real product flows, the Storybook design system is wired in so it's 1:1 with production",
+      "at": 1778
+    },
+    {
+      "toolId": "conductor",
+      "designerId": "danny",
+      "purpose": "Manages git worktrees so parallel Claude sessions don't step on each other",
+      "at": 2068
+    },
+    {
+      "toolId": "playground",
+      "designerId": "kazden",
+      "purpose": "A clone of the Shopify admin, the real design system but in code",
+      "at": 399
+    },
+    {
+      "toolId": "storybook",
+      "designerId": "clint",
+      "purpose": "The design system of record, wired directly into the prototyping tool",
+      "at": 1902
+    },
+    {
+      "toolId": "storybook",
+      "designerId": "kazden",
+      "purpose": "Components updated straight from the agent",
+      "at": 738
+    },
+    {
+      "toolId": "git",
+      "designerId": "jennifer",
+      "purpose": "A breadcrumb trail you leave for yourself, she advocates every designer learn it",
+      "at": 1445
+    },
+    {
+      "toolId": "git",
+      "designerId": "jennifer",
+      "purpose": "Human-readable branch names, because stakeholders have to navigate them too",
+      "at": 826
+    },
+    {
+      "toolId": "git",
+      "designerId": "claire",
+      "purpose": "Her own branch off the engineer's, to tweak small values",
+      "at": 705
+    },
+    {
+      "toolId": "screenrec",
+      "designerId": "clint",
+      "purpose": "Under five minutes, default playback 1.5×, an async meeting, not a recording",
+      "at": 2366
+    },
+    {
+      "toolId": "screenrec",
+      "designerId": "danny",
+      "purpose": "Screen recordings that show flows and interaction detail",
+      "at": 1048
+    },
+    {
+      "toolId": "screenrec",
+      "designerId": "kazden",
+      "purpose": "Records first because it does the nice animation",
+      "at": 3488
+    },
+    {
+      "toolId": "slack",
+      "designerId": "danny",
+      "purpose": "Concepts, clips and explorations shared continuously across the team",
+      "at": 154
+    },
+    {
+      "toolId": "slack",
+      "designerId": "clint",
+      "purpose": "Drops a Loom in a thread Monday morning and lets it percolate, async feedback, no meeting",
+      "at": 2426
+    },
+    {
+      "toolId": "slack",
+      "designerId": "claire",
+      "purpose": "No email at all. She hadn't opened it in a month",
+      "at": 369
+    },
+    {
+      "toolId": "slack",
+      "designerId": "jennifer",
+      "purpose": "One prototype link plus a message, rather than four links stakeholders can't tell apart",
+      "at": 703
+    },
+    {
+      "toolId": "slack",
+      "designerId": "john",
+      "purpose": "One of the sources his weekly roll-up agents read",
+      "at": 375
+    },
+    {
+      "toolId": "git",
+      "designerId": "claire",
+      "purpose": "Her code is in production. She's broken staging exactly once",
+      "at": 767
+    },
+    {
+      "toolId": "miro",
+      "designerId": "andy",
+      "purpose": "Collaborative canvas where sticky notes, survey results and product screenshots all land together",
+      "at": 492
+    },
+    {
+      "toolId": "miro",
+      "designerId": "andy",
+      "purpose": "An opportunity canvas for framing the problem, before anyone talks about a solution",
+      "at": 679
+    },
+    {
+      "toolId": "magicpatterns",
+      "designerId": "andy",
+      "purpose": "Paste the whole validated PRD in and it generates. The first iteration got pretty close.",
+      "at": 30
+    },
+    {
+      "toolId": "figma",
+      "designerId": "karl",
+      "purpose": "A scratchpad to get something out of his head, not production flows and states",
+      "at": 244
+    },
+    {
+      "toolId": "cursor",
+      "designerId": "karl",
+      "purpose": "Eighty percent of his working time, because it is the fastest route from idea to solution",
+      "at": 276
+    },
+    {
+      "toolId": "cursor",
+      "designerId": "karl",
+      "purpose": "Hack phase: one prompt change built the feature in five minutes, half an hour more to finesse the UI",
+      "at": 706
+    },
+    {
+      "toolId": "claude",
+      "designerId": "karl",
+      "purpose": "A cron script that assembles his weekly design links, saving three to four hours a week",
+      "at": 1042
+    },
+    {
+      "toolId": "figma",
+      "designerId": "christina",
+      "purpose": "Static mocks for divergent exploration, annotated with plain text in rows and columns",
+      "at": 372
+    },
+    {
+      "toolId": "figma",
+      "designerId": "christina",
+      "purpose": "Faster than prompting while still thinking out loud, because agents hallucinate when you do not know what you want",
+      "at": 402
+    },
+    {
+      "toolId": "figmamake",
+      "designerId": "christina",
+      "purpose": "High fidelity interactions inside the existing design system, built piece by piece rather than one shot",
+      "at": 771
+    },
+    {
+      "toolId": "figmamake",
+      "designerId": "christina",
+      "purpose": "Give a frame a unique name and it copies the design almost pixel to pixel",
+      "at": 985
+    },
+    {
+      "toolId": "replit",
+      "designerId": "christina",
+      "purpose": "Zero to one proof of concept, independent of the codebase. The most forgiving of the three.",
+      "at": 1230
+    },
+    {
+      "toolId": "cursor",
+      "designerId": "christina",
+      "purpose": "Small changes to real production code, and prototypes that need real data behind them",
+      "at": 33
+    },
+    {
+      "toolId": "chatgpt",
+      "designerId": "christina",
+      "purpose": "Learned which voice characteristics actually vary, then worked with it to write the PRD",
+      "at": 1567
+    },
+    {
+      "toolId": "figma",
+      "designerId": "henry",
+      "purpose": "Napkin sketches to work out the mechanics. Never pixel perfect mockups.",
+      "at": 4
+    },
+    {
+      "toolId": "figma",
+      "designerId": "henry",
+      "purpose": "At this stage it is not about UI, it is about how the thing works and why it is valuable",
+      "at": 35
+    },
+    {
+      "toolId": "git",
+      "designerId": "henry",
+      "purpose": "When it is right he pushes it and it is live. No further process, no roadmap slot.",
+      "at": 467
+    }
+  ],
+  "moves": [
+    {
+      "from": "mobbin",
+      "to": "figma",
+      "designerId": "danny",
+      "reason": "Builds a catalogue of patterns per project, per file",
+      "at": 802
+    },
+    {
+      "from": "mobbin",
+      "to": "figjam",
+      "designerId": "kazden",
+      "reason": "Curates screenshots and highlights the exact element that applies",
+      "at": 152
+    },
+    {
+      "from": "mobbin",
+      "to": "figma",
+      "designerId": "claire",
+      "reason": "Pulls template inspiration in while designing",
+      "at": 888
+    },
+    {
+      "from": "granola",
+      "to": "claude",
+      "designerId": "clint",
+      "reason": "Pastes meeting nuggets in and asks for prompts to take into Enterpret",
+      "at": 430
+    },
+    {
+      "from": "claude",
+      "to": "enterpret",
+      "designerId": "clint",
+      "reason": "Runs the generated prompt against the whole feedback corpus",
+      "at": 705
+    },
+    {
+      "from": "enterpret",
+      "to": "claudecode",
+      "designerId": "clint",
+      "reason": "Opportunity areas and user stories become the brief for a prototype",
+      "at": 1132
+    },
+    {
+      "from": "hex",
+      "to": "claudecode",
+      "designerId": "clint",
+      "reason": "Checks the behaviour matches the complaint before building anything",
+      "at": 1009
+    },
+    {
+      "from": "figjam",
+      "to": "claude",
+      "designerId": "john",
+      "reason": "A sticky board is bad documentation, Claude turns it into a real summary",
+      "at": 591
+    },
+    {
+      "from": "claude",
+      "to": "notion",
+      "designerId": "john",
+      "reason": "The summary becomes a document the team can actually reference",
+      "at": 716
+    },
+    {
+      "from": "figjam",
+      "to": "claudecode",
+      "designerId": "kazden",
+      "reason": "The diagrams and highlighted screenshots become the context it thinks with",
+      "at": 338
+    },
+    {
+      "from": "voice",
+      "to": "claudedesign",
+      "designerId": "danny",
+      "reason": "Dictates the whole prompt by voice instead of typing it",
+      "at": 1110
+    },
+    {
+      "from": "voice",
+      "to": "claude",
+      "designerId": "clint",
+      "reason": "Rambles out loud, then asks for it back as a structured prompt",
+      "at": 1285
+    },
+    {
+      "from": "figma",
+      "to": "claudecode",
+      "designerId": "danny",
+      "reason": "The masking and morph were annoying to prototype in Figma, so hand it over",
+      "at": 2037
+    },
+    {
+      "from": "figma",
+      "to": "claudecode",
+      "designerId": "danny",
+      "reason": "Copies link-to-selection and points Claude at the real designs through the Figma MCP",
+      "at": 2501
+    },
+    {
+      "from": "claudedesign",
+      "to": "claudecode",
+      "designerId": "danny",
+      "reason": "Copies the generated code across so it already knows the shape of the thing",
+      "at": 3272
+    },
+    {
+      "from": "claudecode",
+      "to": "conductor",
+      "designerId": "danny",
+      "reason": "Conductor wraps the CLI and handles worktree overhead",
+      "at": 2099
+    },
+    {
+      "from": "claudecode",
+      "to": "paper",
+      "designerId": "danny",
+      "reason": "Generates five concepts directly onto the canvas via the Paper MCP",
+      "at": 3731
+    },
+    {
+      "from": "paper",
+      "to": "claudecode",
+      "designerId": "danny",
+      "reason": "Everything on that canvas is already code, so nothing is lost in translation",
+      "at": 3945
+    },
+    {
+      "from": "claudecode",
+      "to": "playground",
+      "designerId": "kazden",
+      "reason": "Hands over the screenshot, the rough code and the spoken plan together",
+      "at": 490
+    },
+    {
+      "from": "playground",
+      "to": "storybook",
+      "designerId": "kazden",
+      "reason": "Works against the real design system, in code",
+      "at": 738
+    },
+    {
+      "from": "playground",
+      "to": "git",
+      "designerId": "kazden",
+      "reason": "Engineers fork the exact commit and think with the same materials",
+      "at": 2509
+    },
+    {
+      "from": "claudecode",
+      "to": "figma",
+      "designerId": "clint",
+      "reason": "Asks Claude to send every screen back, because Figma is where it all lands",
+      "at": 1685
+    },
+    {
+      "from": "storybook",
+      "to": "magicpatterns",
+      "designerId": "clint",
+      "reason": "The design system is wired in, so prototypes are 1:1 with production",
+      "at": 1902
+    },
+    {
+      "from": "magicpatterns",
+      "to": "git",
+      "designerId": "clint",
+      "reason": "Hands the link straight to an engineer, less of a traditional handoff",
+      "at": 1871
+    },
+    {
+      "from": "claudecode",
+      "to": "screenrec",
+      "designerId": "clint",
+      "reason": "Walks through the prototype rather than making people read it",
+      "at": 979
+    },
+    {
+      "from": "screenrec",
+      "to": "slack",
+      "designerId": "clint",
+      "reason": "Drops it in a thread and lets it percolate, an async meeting",
+      "at": 2426
+    },
+    {
+      "from": "figma",
+      "to": "git",
+      "designerId": "claire",
+      "reason": "A single page with pointers, sent to the engineer to go build",
+      "at": 644
+    },
+    {
+      "from": "git",
+      "to": "cursor",
+      "designerId": "claire",
+      "reason": "Branches off the engineer's work to polish the details herself",
+      "at": 705
+    },
+    {
+      "from": "cursor",
+      "to": "git",
+      "designerId": "claire",
+      "reason": "Her own branches, her own PRs, her code in production",
+      "at": 767
+    },
+    {
+      "from": "figma",
+      "to": "cursor",
+      "designerId": "jennifer",
+      "reason": "Micro-interactions that took hours in Figma take minutes in code",
+      "at": 243
+    },
+    {
+      "from": "cursor",
+      "to": "git",
+      "designerId": "jennifer",
+      "reason": "Each variant is a branch, named so stakeholders can read it",
+      "at": 826
+    },
+    {
+      "from": "git",
+      "to": "slack",
+      "designerId": "jennifer",
+      "reason": "One link with a built-in version switcher, not four links",
+      "at": 703
+    },
+    {
+      "from": "figma",
+      "to": "cursor",
+      "designerId": "john",
+      "reason": "Applied the new brand to the live product to show the vision",
+      "at": 1551
+    },
+    {
+      "from": "screenrec",
+      "to": "slack",
+      "designerId": "danny",
+      "reason": "Video is the format that actually shows flows and interaction detail",
+      "at": 1048
+    },
+    {
+      "from": "conductor",
+      "to": "git",
+      "designerId": "danny",
+      "reason": "It's in code now, so push a draft PR and let people use it",
+      "at": 2719
+    },
+    {
+      "from": "git",
+      "to": "slack",
+      "designerId": "danny",
+      "reason": "Shares a clip with a voiceover, here's before, here's what I'm thinking",
+      "at": 3458
+    },
+    {
+      "from": "miro",
+      "to": "magicpatterns",
+      "designerId": "andy",
+      "reason": "The validated PRD goes straight in as the prompt",
+      "at": 30
+    },
+    {
+      "from": "figma",
+      "to": "cursor",
+      "designerId": "karl",
+      "reason": "Skips developing a flat idea and goes straight to building the real thing",
+      "at": 276
+    },
+    {
+      "from": "cursor",
+      "to": "git",
+      "designerId": "karl",
+      "reason": "Shares a working branch so the people following the project can react to it",
+      "at": 798
+    },
+    {
+      "from": "chatgpt",
+      "to": "replit",
+      "designerId": "christina",
+      "reason": "The PRD it helped write becomes the brief",
+      "at": 1598
+    },
+    {
+      "from": "figma",
+      "to": "figmamake",
+      "designerId": "christina",
+      "reason": "Existing frames become the reference for building the interaction",
+      "at": 740
+    },
+    {
+      "from": "replit",
+      "to": "git",
+      "designerId": "christina",
+      "reason": "Handed the project to an engineer who used the code directly. There was no handoff step.",
+      "at": 1476
+    },
+    {
+      "from": "figma",
+      "to": "git",
+      "designerId": "henry",
+      "reason": "Straight from the sketch into code, then pushed once the details feel right",
+      "at": 405
+    }
+  ],
+  "choices": [
+    {
+      "designerId": "clint",
+      "a": "magicpatterns",
+      "b": "claudecode",
+      "criterion": "Is this something I'm going to refine, or something I'm going to invent? Refining a real flow goes to Magic Patterns, because the design system is wired in. Inventing something that doesn't exist yet goes to Claude, free of those constraints.",
+      "at": 1748
+    },
+    {
+      "designerId": "danny",
+      "a": "claudedesign",
+      "b": "claudecode",
+      "criterion": "Going wide and the precise details don't matter yet, Claude Design. Dialling in details, or actually shipping, Conductor or Claude Code.",
+      "at": 3120
+    },
+    {
+      "designerId": "danny",
+      "a": "conductor",
+      "b": "claudecode",
+      "criterion": "Worktrees in the terminal are cumbersome. A well-designed GUI beats a terminal any day.",
+      "at": 2099
+    },
+    {
+      "designerId": "danny",
+      "a": "paper",
+      "b": "figma",
+      "criterion": "Everything in Paper is already HTML and CSS so Claude builds from it far more accurately, nothing has to translate.",
+      "at": 3945
+    },
+    {
+      "designerId": "kazden",
+      "a": "claudecode",
+      "b": "cursor",
+      "criterion": "The intelligence plus MCP plus markdown skills is the unlock. The terminal is just the interface and Cursor's chat feels clunkier.",
+      "at": 3366
+    },
+    {
+      "designerId": "kazden",
+      "a": "claudecode",
+      "b": "figma",
+      "criterion": "AI-first experiences are very hard to do statically in Figma, because the possibilities of a conversation are open-ended.",
+      "at": 1408
+    },
+    {
+      "designerId": "jennifer",
+      "a": "cursor",
+      "b": "figma",
+      "criterion": "Fluid drag-and-drop was hours of stop-motion frames in Figma and minutes in code and it tests far better.",
+      "at": 243
+    },
+    {
+      "designerId": "jennifer",
+      "a": "cursor",
+      "b": "figma",
+      "criterion": "Branches hold variants properly, so one link with a switcher replaces a pile of separate prototypes.",
+      "at": 1626
+    },
+    {
+      "designerId": "claire",
+      "a": "cursor",
+      "b": "figma",
+      "criterion": "Ask mode more than anything else, highlight something, ask what it does, learn the codebase without breaking it.",
+      "at": 767
+    },
+    {
+      "designerId": "john",
+      "a": "claude",
+      "b": "figma",
+      "criterion": "Claude summarising a board beat Figma's native export, you get a true summary, not the raw data in a readable format.",
+      "at": 748
+    },
+    {
+      "designerId": "andy",
+      "a": "magicpatterns",
+      "b": "miro",
+      "criterion": "AI prototyping is a game changer, but speeding up in the wrong direction is still a waste. Discovery settles the direction first.",
+      "at": 308
+    },
+    {
+      "designerId": "karl",
+      "a": "cursor",
+      "b": "figma",
+      "criterion": "Developing a flat idea then putting it into code meant too much back and forth. Now the idea goes straight into code.",
+      "at": 276
+    },
+    {
+      "designerId": "christina",
+      "a": "figma",
+      "b": "figmamake",
+      "criterion": "If a simple interaction can be stitched from mocks you already have, a plain Figma prototype gets the job done.",
+      "at": 464
+    },
+    {
+      "designerId": "christina",
+      "a": "figmamake",
+      "b": "replit",
+      "criterion": "Figma Make and Cursor already carry the design system. Replit is for starting from scratch, when nothing has to match.",
+      "at": 495
+    },
+    {
+      "designerId": "christina",
+      "a": "cursor",
+      "b": "figmamake",
+      "criterion": "Does it need real data to show how it works? Then Cursor. If it reads in isolation, Figma Make.",
+      "at": 526
+    },
+    {
+      "designerId": "henry",
+      "a": "figma",
+      "b": "git",
+      "criterion": "Visuals too early are a rabbit hole. A written document formulates the vision before anything is drawn.",
+      "at": 65
+    }
+  ],
+  "handoff": [
+    {
+      "designerId": "danny",
+      "claim": "No traditional Figma handoff. A clip with a voiceover, then the PR, then sit with an engineer.",
+      "at": 3426
+    },
+    {
+      "designerId": "kazden",
+      "claim": "Time spent maintaining a Figma artifact of the end-to-end experience is down to zero. Engineers start from code, about 80% carries over.",
+      "at": 2723
+    },
+    {
+      "designerId": "clint",
+      "claim": "Hands the Magic Patterns link straight to an engineer. Less of a traditional handoff but Figma is still where it all lands.",
+      "at": 1871
+    },
+    {
+      "designerId": "claire",
+      "claim": "Still shares a Figma link, one page with pointers then goes into Cursor afterwards to polish it herself.",
+      "at": 644
+    },
+    {
+      "designerId": "jennifer",
+      "claim": "Prototype links go to research and stakeholders, with a version switcher built into the prototype.",
+      "at": 703
+    },
+    {
+      "designerId": "john",
+      "claim": "Had the agent summarise the branch into scoped work, which turned a 90-minute meeting into an early finish.",
+      "at": 1582
+    },
+    {
+      "designerId": "christina",
+      "claim": "Gave the prototype to an engineer who used the code directly in the product. There was no handoff.",
+      "at": 1476
+    },
+    {
+      "designerId": "henry",
+      "claim": "Pushes it himself. No kicking off an engineering process, no finding a slot in the roadmap.",
+      "at": 467
+    },
+    {
+      "designerId": "andy",
+      "claim": "One to two weeks of discovery and a product trio aligned before any prototyping starts.",
+      "at": 461
+    }
+  ],
+  "companies": [
+    {
+      "id": "wealthsimple",
+      "name": "Wealthsimple",
+      "type": "growth fintech"
+    },
+    {
+      "id": "shopify",
+      "name": "Shopify",
+      "type": "big tech"
+    },
+    {
+      "id": "givebutter",
+      "name": "Givebutter",
+      "type": "growth nonprofit tech"
+    },
+    {
+      "id": "descript",
+      "name": "Descript",
+      "type": "growth creative tools"
+    },
+    {
+      "id": "chronicle",
+      "name": "Chronicle",
+      "type": "seed startup"
+    },
+    {
+      "id": "cnn",
+      "name": "CNN",
+      "type": "enterprise media"
+    },
+    {
+      "id": "eso",
+      "name": "ESO",
+      "type": "regulated healthcare data"
+    },
+    {
+      "id": "duckduckgo",
+      "name": "DuckDuckGo",
+      "type": "privacy tech"
+    },
+    {
+      "id": "perplexity",
+      "name": "Perplexity",
+      "type": "AI native"
+    }
+  ]
+}
