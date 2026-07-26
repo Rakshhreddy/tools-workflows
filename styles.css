@@ -140,11 +140,13 @@ html, body {
 #graph.dimmed .node.lit { opacity: 1; }
 #graph.dimmed .edge.lit { opacity: 0.95 !important; }
 
-/* Entrance: nodes settle in, edges draw after. */
-@keyframes riseIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+/* Entrance: a calm fade-in. Node groups are positioned via the SVG transform
+ * attribute, so we animate opacity ONLY here — never transform, or tiles would
+ * jump to the origin and fly in from the wrong place. */
+@keyframes riseIn { from { opacity: 0; } to { opacity: 1; } }
 @keyframes edgeIn { from { opacity: 0; } to { opacity: 1; } }
-#graph.intro .node { animation: riseIn .5s cubic-bezier(.22,.61,.36,1) backwards; }
-#graph.intro .edge { animation: edgeIn .6s ease backwards; }
+#graph.intro .node { animation: riseIn .45s ease backwards; }
+#graph.intro .edge { animation: edgeIn .5s ease backwards; }
 
 .foot {
   flex: none;

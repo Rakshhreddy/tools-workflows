@@ -85,6 +85,27 @@ function computeLayout(nodes) {
   const clear = (n, lane, x) => !placed.some((p) =>
     p !== n && p.lane === lane && Math.abs(x - p.x) < n.r + p.r + 54);
 
+  // Filtered view (a company or one person). The corpus scatter is built for
+  // 24 tools; with only a handful it reads as lonely islands and long stray
+  // lines. So here we lay each stage out cleanly: horizontally centred in its
+  // band, evenly stacked and vertically centred as a group. Calm and ordered.
+  if (focused()) {
+    const cy = TOP + (H - TOP - BOT) / 2;
+    STAGES.forEach((st) => {
+      const list = nodes.filter((n) => n.stage === st.id)
+        .sort((a, b) => b.by.length - a.by.length);
+      if (!list.length) return;
+      const gap = Math.min(150, (H - TOP - BOT) / (list.length + 0.5));
+      const total = (list.length - 1) * gap;
+      list.forEach((n, i) => {
+        n.x = st.x;
+        n.y = cy - total / 2 + i * gap;
+        n.lane = i;
+      });
+    });
+    return;
+  }
+
   STAGES.forEach((st, si) => {
     const list = nodes.filter((n) => n.stage === st.id)
       .sort((a, b) => b.by.length - a.by.length);
@@ -266,12 +287,6 @@ function render(nodes) {
     label.setAttribute('font-size', n.by.length >= 5 ? '12.5' : '11.5');
     label.textContent = n.name;
     g.appendChild(label);
-
-    if (!focused()) {
-      const c = el('text', { class: 'node-count', x: 0, y: n.r + 29 });
-      c.textContent = `${n.by.length}/${DATA.designers.length}`;
-      g.appendChild(c);
-    }
 
     g.addEventListener('mouseenter', (ev) => { if (!n.dragging) { tipNode(ev, n); focusNode(n); } });
     g.addEventListener('mousemove', (ev) => { if (!n.dragging) moveTip(ev); });
