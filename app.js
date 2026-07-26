@@ -271,7 +271,7 @@ function render(nodes) {
     }));
     if (i) gBands.appendChild(el('line', {
       x1: st.x0, y1: 24, x2: st.x0, y2: H - 22,
-      stroke: 'var(--line-2)', 'stroke-width': '1'
+      stroke: 'var(--line)', 'stroke-width': '1'
     }));
     const lab = el('text', { class: 'band-label', x: st.x0 + 16, y: 34 });
     lab.textContent = `${i + 1} ${st.label}`;
