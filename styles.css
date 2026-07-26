@@ -47,7 +47,7 @@ html, body {
 
 /* ---------- header ---------- */
 
-.head { padding: 24px 34px 12px; flex: none; }
+.head { padding: 22px 34px 0; flex: none; }
 
 .head-row {
   display: flex;
@@ -57,44 +57,76 @@ html, body {
   flex-wrap: wrap;
 }
 
-.lede { margin: 0; max-width: 50ch; line-height: 1.5; font-size: 14.5px; }
-.title { font-weight: 600; letter-spacing: -0.01em; color: var(--ink); }
+.lede { margin: 0; max-width: 52ch; line-height: 1.55; font-size: 14.5px; }
+.title { font-weight: 600; letter-spacing: -0.015em; color: var(--ink); }
 .sub { color: var(--ink-2); }
+
+.head-bottom {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  margin-top: 16px;
+  padding-bottom: 14px;
+  border-bottom: 0.5px solid var(--line);
+}
+
+/* Stage dots: a subtle geometric decoration hinting at the 5 workflow phases.
+ * No labels, no legend — just a quiet visual anchor that ties the header to
+ * the canvas columns below. */
+.stage-dots {
+  display: flex;
+  gap: 5px;
+  flex: none;
+}
+.stage-dot {
+  width: 20px; height: 3px;
+  border-radius: 2px;
+  transition: background .3s;
+}
+.stage-dot:nth-child(1) { background: rgba(237, 237, 237, 0.08); }
+.stage-dot:nth-child(2) { background: rgba(237, 237, 237, 0.13); }
+.stage-dot:nth-child(3) { background: rgba(237, 237, 237, 0.20); }
+.stage-dot:nth-child(4) { background: rgba(237, 237, 237, 0.28); }
+.stage-dot:nth-child(5) { background: rgba(237, 237, 237, 0.38); }
+
+.mode {
+  flex: 1;
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: var(--ink-2);
+  min-height: 18px;
+}
+.mode b { color: var(--ink); font-weight: 600; }
+.mode .role { color: var(--ink-3); }
 
 .rails { display: flex; flex-direction: column; align-items: flex-end; gap: 8px; }
 .who, .who-sub { display: flex; gap: 6px; flex-wrap: wrap; justify-content: flex-end; }
 
 .chip {
-  padding: 6px 13px;
+  padding: 5px 13px;
   border: 0.5px solid var(--line);
   border-radius: 100px;
   background: transparent;
   cursor: pointer;
   font: inherit;
-  font-size: 13px;
+  font-size: 12.5px;
   color: var(--ink-2);
   white-space: nowrap;
-  transition: border-color .15s, color .15s, background .15s;
+  transition: border-color .2s, color .2s, background .2s, box-shadow .2s;
 }
-.chip:hover { border-color: var(--line-2); color: var(--ink); }
+.chip:hover {
+  border-color: var(--line-2);
+  color: var(--ink);
+  box-shadow: 0 1px 6px rgba(0, 0, 0, 0.2);
+}
 .chip[aria-pressed="true"] {
   border-color: var(--accent);
-  color: var(--accent);
-  background: rgba(225, 73, 32, 0.10);
+  color: var(--ink);
+  background: rgba(225, 73, 32, 0.06);
 }
-.chip.sub-chip { font-size: 12px; padding: 5px 11px; }
+.chip.sub-chip { font-size: 11.5px; padding: 4px 11px; }
 .chip .role { color: var(--ink-3); margin-left: 5px; }
-.chip[aria-pressed="true"] .role { color: rgba(225, 73, 32, 0.7); }
-
-.mode {
-  margin: 14px 0 0;
-  font-size: 13px;
-  line-height: 1.5;
-  color: var(--ink-2);
-  min-height: 20px;
-}
-.mode b { color: var(--ink); font-weight: 600; }
-.mode .role { color: var(--ink-3); }
+.chip[aria-pressed="true"] .role { color: var(--ink-2); }
 
 /* ---------- canvas ---------- */
 
@@ -105,19 +137,20 @@ html, body {
   content: '';
   position: absolute; inset: 0;
   pointer-events: none;
-  background: radial-gradient(120% 90% at 50% 42%, rgba(255,255,255,0.035) 0%, rgba(255,255,255,0) 46%, rgba(0,0,0,0.35) 100%);
+  background: radial-gradient(120% 90% at 50% 42%, rgba(255,255,255,0.030) 0%, rgba(255,255,255,0) 46%, rgba(0,0,0,0.30) 100%);
+  z-index: 0;
 }
-#graph { width: 100%; height: 100%; display: block; }
+#graph { width: 100%; height: 100%; display: block; position: relative; z-index: 1; }
 
 .edge { fill: none; stroke-linecap: round; transition: opacity .2s; }
 .edge-hit { fill: none; stroke: transparent; stroke-width: 16; cursor: pointer; }
 
 .band-label {
-  font-size: 11.5px;
+  font-size: 10px;
   font-weight: 600;
-  letter-spacing: 1.3px;
+  letter-spacing: 1.5px;
   text-transform: uppercase;
-  fill: var(--ink-2);
+  fill: var(--ink-3);
 }
 
 .node { cursor: grab; }
@@ -149,7 +182,7 @@ html, body {
 
 .foot {
   flex: none;
-  padding: 12px 34px 16px;
+  padding: 10px 34px 14px;
   font-size: 11px;
   color: var(--ink-3);
   display: flex;
@@ -157,11 +190,12 @@ html, body {
   align-items: center;
   gap: 0;
   line-height: 1.6;
+  border-top: 0.5px solid var(--line);
 }
-.foot a { color: var(--ink-3); text-decoration: none; }
+.foot a { color: var(--ink-3); text-decoration: none; transition: color .15s; }
 .foot a:hover { color: var(--ink); }
-.foot .sep { margin: 0 9px; color: rgba(237, 237, 237, 0.16); }
-.foot .lead { margin-right: 11px; color: rgba(237, 237, 237, 0.26); }
+.foot .sep { margin: 0 8px; color: rgba(237, 237, 237, 0.12); }
+.foot .lead { margin-right: 10px; color: rgba(237, 237, 237, 0.2); font-weight: 500; }
 
 /* ---------- tooltip ---------- */
 
@@ -170,14 +204,16 @@ html, body {
   z-index: 5;
   width: 322px;
   padding: 14px 16px 15px;
-  background: var(--surface);
+  background: rgba(26, 26, 26, 0.92);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   border: 0.5px solid var(--line-2);
   border-radius: 12px;
   font-size: 12.5px;
   line-height: 1.5;
   color: var(--ink-2);
   pointer-events: none;
-  box-shadow: 0 16px 44px rgba(0, 0, 0, .55);
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.5);
 }
 .tip b { display: block; color: var(--ink); font-weight: 600; font-size: 14px; }
 .tip .tip-count { display: block; margin: 3px 0 12px; }
@@ -193,50 +229,87 @@ html, body {
 
 /* ---------- panel ---------- */
 
+.panel-backdrop {
+  position: fixed; inset: 0; z-index: 20;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
+  animation: backdropIn .25s ease;
+}
+@keyframes backdropIn {
+  from { opacity: 0; }
+}
+
 .panel {
   position: fixed;
   top: 0; right: 0; bottom: 0;
-  width: min(420px, 92vw);
+  width: min(440px, 92vw);
   background: var(--surface);
   border-left: 0.5px solid var(--line);
-  /* No top padding: a sticky heading pins against the scroll container's
-   * padding box, so 28px here would park every heading 28px down and leave a
-   * strip of content sliding past above it. The inset lives on the body. */
-  padding: 0 26px 40px;
-  /* overflow-y alone would compute overflow-x to auto, and the headings bleed
-   * to the exact panel edge, so any drift would raise a sideways scrollbar. */
-  overflow-x: hidden;
+  box-shadow: -32px 0 80px rgba(0, 0, 0, 0.5);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  animation: panelSlide .3s cubic-bezier(0.22, 1, 0.36, 1);
+}
+@keyframes panelSlide {
+  from { transform: translateX(100%); opacity: 0; }
+}
+
+.panel-inner {
+  flex: 1;
   overflow-y: auto;
-  z-index: 20;
-  box-shadow: -24px 0 70px rgba(0, 0, 0, .5);
+  overflow-x: hidden;
+  padding: 0 28px 40px;
 }
-/* Fixed, not absolute: absolute would scroll away with the content, and the
- * sticky section headings would paint over it on the way past. */
-.panel-close {
-  position: fixed; top: 18px; right: 18px; z-index: 3;
-  border: none; background: none; color: var(--ink-3);
-  font-size: 20px; line-height: 1; cursor: pointer; padding: 4px 8px;
+
+.panel-inner::-webkit-scrollbar { width: 4px; }
+.panel-inner::-webkit-scrollbar-track { background: transparent; }
+.panel-inner::-webkit-scrollbar-thumb { background: var(--line-2); border-radius: 4px; }
+
+/* Accent stripe at the top of the panel */
+.panel-inner::before {
+  content: '';
+  display: block;
+  height: 3px;
+  margin: 0 -28px 0;
+  background: linear-gradient(90deg, var(--accent) 0%, rgba(225, 73, 32, 0.3) 60%, transparent 100%);
 }
-.panel-close:hover { color: var(--ink); }
 
 /* Header as a vertical slice of the graph: what feeds in, this tool, where it
  * goes. Everything is aligned to one spine at x=20, the centre of the 40px
  * mark, so it reads as a diagram rather than three stacked elements. */
-#panelBody { padding-top: 28px; }
-.panel-head { margin-bottom: 26px; }
-.panel-id { display: flex; align-items: center; gap: 13px; }
-.flow-row { display: flex; flex-wrap: wrap; gap: 7px; margin-left: 7px; }
-.flow-arrow { display: block; width: 10px; height: 22px; margin-left: 15px; }
+.panel-head {
+  padding: 24px 0 18px;
+  margin-bottom: 24px;
+  border-bottom: 0.5px solid var(--line);
+}
+
+.panel-head .flow-row { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }
+.panel-head .flow-row:last-child { margin-bottom: 0; }
+.panel-head .flow-row + .flow-row { margin-top: 4px; }
+
+.panel-id {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin: 14px 0 0;
+}
+.panel-id:first-child { margin-top: 0; }
+
+.flow-arrow { display: block; width: 10px; height: 14px; margin: 6px 0 6px 2px; }
 
 .panel-mark {
-  width: 40px; height: 40px; flex: none; border-radius: 10px;
+  width: 48px; height: 48px; flex: none; border-radius: 12px;
   background: var(--tile);
   display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
 }
-.panel-mark svg, .panel-mark img { width: 22px; height: 22px; }
+.panel-mark svg, .panel-mark img { width: 26px; height: 26px; }
 .panel-mark span { color: #2a2a2a; }
-.panel h2 { margin: 0; font-size: 17px; font-weight: 600; letter-spacing: -0.01em; }
-.panel .kind { margin: 3px 0 0; }
+
+.panel h2 { margin: 0; font-size: 18px; font-weight: 600; letter-spacing: -0.01em; }
+.panel .kind { margin: 2px 0 0; font-size: 11px; }
 
 /* Light tiles, same as the canvas, so a mark in the panel means what it means
  * out there: a tool you can go to. */
@@ -244,61 +317,103 @@ html, body {
   border: 0; padding: 0; cursor: pointer; flex: none;
   background: var(--tile); font-family: inherit;
   display: flex; align-items: center; justify-content: center;
-  transition: transform .18s ease;
+  transition: transform .18s ease, box-shadow .18s ease;
 }
 .flow-tile { width: 26px; height: 26px; border-radius: 8px; }
 .row-tile  { width: 24px; height: 24px; border-radius: 7px; }
-.flow-tile:hover, .row-tile:hover { transform: scale(1.08); }
+.flow-tile:hover, .row-tile:hover { transform: scale(1.1); box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25); }
 .flow-tile svg, .flow-tile img { width: 15px; height: 15px; }
 .row-tile svg,  .row-tile img  { width: 14px; height: 14px; }
 .mono { font-weight: 700; color: #2a2a2a; }
-.panel-mark .mono { font-size: 13px; }
+.panel-mark .mono { font-size: 15px; }
 .flow-tile .mono { font-size: 9px; }
 .row-tile .mono { font-size: 8.5px; }
 span.row-tile { cursor: default; }
 
-.sect { margin-bottom: 24px; }
-/* Pinned, so the direction arrow stays on screen for every row under it.
- * Negative margins bleed the background over the panel's 26px padding. */
-.sect h3 {
-  position: sticky; top: 0; z-index: 2;
-  margin: 0 -26px 11px; padding: 10px 26px 9px;
-  background: var(--surface);
+/* Close button - refined X icon */
+.panel-close {
+  position: absolute; top: 16px; right: 16px; z-index: 3;
+  width: 28px; height: 28px;
+  border: none; background: none;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  border-radius: 6px;
+  transition: background .15s;
 }
-.sect h3 .dir { margin-left: 7px; color: var(--ink-2); }
+.panel-close:hover { background: var(--surface-2); }
+.panel-close svg { width: 14px; height: 14px; stroke: var(--ink-3); stroke-width: 1.5; stroke-linecap: round; }
+.panel-close:hover svg { stroke: var(--ink); }
 
-.item { padding: 11px 0; border-top: 0.5px solid var(--line); }
-.sect > .item:first-of-type { border-top: none; padding-top: 0; }
-.item p { margin: 0 0 6px; font-size: 13.5px; line-height: 1.55; color: var(--ink); }
+.sect { margin-bottom: 28px; }
+.sect h3 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  color: var(--ink-3);
+  margin: 0 0 14px;
+  padding-bottom: 6px;
+  border-bottom: 0.5px solid var(--line);
+}
+.sect h3 .dir { color: var(--ink-2); font-size: 11px; }
+
+.item {
+  padding: 13px 0;
+}
+.item + .item { border-top: 0.5px solid var(--line); }
+.sect > .item:first-of-type { padding-top: 0; }
+.item p { margin: 0 0 7px; font-size: 13.5px; line-height: 1.55; color: var(--ink); }
 
 /* One tile: a handoff, one named tool. */
-.item-tool { display: grid; grid-template-columns: 24px 1fr; gap: 11px; align-items: start; }
-.item-name { font-weight: 600; margin-bottom: 2px !important; }
+.item-tool { display: grid; grid-template-columns: 24px 1fr; gap: 12px; align-items: start; }
+.item-name { font-weight: 600; color: var(--ink); margin-bottom: 2px !important; }
+.item-tool .item-name { font-size: 13px; }
 
 /* Two tiles: a choice. No other row in the panel has this shape. */
-.item-pair .pair { display: flex; align-items: center; gap: 6px; margin-bottom: 9px; }
+.item-pair .pair { display: flex; align-items: center; gap: 6px; margin-bottom: 10px; }
 .pair-name { font-size: 13px; font-weight: 600; color: var(--ink); }
-.pair-sep { font-size: 11.5px; color: var(--ink-3); margin: 0 3px; }
+.pair-sep { font-size: 11px; color: var(--ink-3); margin: 0 4px; }
 
-.by { font-size: 11.5px; line-height: 1.5; color: var(--ink-3); }
-.by a { color: var(--ink-2); text-decoration: none; border-bottom: 1px solid var(--line-2); }
-.by a:hover { color: var(--ink); }
+.by {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11.5px;
+  color: var(--ink-3);
+}
+.by a {
+  color: var(--ink-2);
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+  transition: border-color .15s, color .15s;
+}
+.by a:hover { color: var(--ink); border-color: var(--ink-3); }
 
-/* font-family only, so the .micro sizing on the element still applies. */
+/* Expandable sections */
 .more {
   border: 0; background: none; cursor: pointer; font-family: inherit;
-  padding: 12px 0 0; color: var(--ink-3);
+  padding: 14px 0 0; color: var(--ink-3); font-size: 11px; font-weight: 500;
+  display: block;
+  transition: color .15s;
 }
 .more:hover { color: var(--ink); }
 
-.empty { font-size: 13px; color: var(--ink-3); }
+.empty { font-size: 13px; color: var(--ink-3); padding: 4px 0; }
+
+/* Quote items - clean block style */
+.item p:only-child { margin-bottom: 0; }
 
 @media (max-width: 900px) {
   .head { padding: 18px 20px 10px; }
   .canvas-wrap { padding: 0 20px; }
-  .foot { left: 20px; }
+  .foot { left: 20px; padding: 10px 20px 14px; }
   .rails { align-items: flex-start; }
   .who, .who-sub { justify-content: flex-start; }
+  .stage-dots { display: none; }
+  .head-bottom { flex-wrap: wrap; gap: 10px; }
 }
 
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }

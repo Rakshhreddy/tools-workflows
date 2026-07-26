@@ -482,6 +482,7 @@ function renderSummary() {
   if (person) {
     const p = who(person);
     el2.innerHTML = `<b>${p.name}</b><span class="role">, ${p.role} at ${firmOf(person).name}.</span> ${p.thesis}`;
+    el2.classList.add('has-content');
     return;
   }
   if (company) {
@@ -494,9 +495,11 @@ function renderSummary() {
       const names = andList(staff.map((p) => p.name));
       el2.innerHTML = `<b>${c.name}</b><span class="role">, ${names}.</span> Pick one to see their workflow.`;
     }
+    el2.classList.add('has-content');
     return;
   }
   el2.innerHTML = '';
+  el2.classList.remove('has-content');
 }
 
 /* ---------- tooltip ---------- */
@@ -659,8 +662,14 @@ function openPanel(n) {
   }).filter(Boolean));
 
   $('panelBody').innerHTML = html;
+  $('panelBody').scrollTop = 0;
+  $('panelBackdrop').hidden = false;
   $('panel').scrollTop = 0;
-  $('panel').hidden = false;
+}
+
+function closePanel() {
+  $('panelBackdrop').hidden = true;
+  hideTip();
 }
 
 /* ---------- boot ---------- */
@@ -731,7 +740,10 @@ async function boot() {
     ).join('<span class="sep">/</span>');
 
   draw();
-  $('panelClose').addEventListener('click', () => { $('panel').hidden = true; });
+  $('panelClose').addEventListener('click', closePanel);
+  $('panelBackdrop').addEventListener('click', (e) => {
+    if (e.target === $('panelBackdrop')) closePanel();
+  });
 
   // Every tile in the panel is a way through the graph, so the panel browses
   // like the canvas does.
@@ -750,8 +762,14 @@ async function boot() {
     more.setAttribute('aria-expanded', String(open));
     more.textContent = open ? 'Show less' : 'Show all';
   });
+
+  // Global keyboard shortcut
   document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape') { $('panel').hidden = true; hideTip(); }
+    if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+      e.preventDefault();
+      closePanel();
+    }
+    if (e.key === 'Escape') { closePanel(); hideTip(); }
   });
 
   let t;

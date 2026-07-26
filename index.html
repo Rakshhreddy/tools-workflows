@@ -20,7 +20,16 @@
         <div class="who-sub" id="whoSub"></div>
       </div>
     </div>
-    <p class="mode" id="mode"></p>
+    <div class="head-bottom">
+      <div class="stage-dots" aria-hidden="true">
+        <span class="stage-dot" style="--i:0"></span>
+        <span class="stage-dot" style="--i:1"></span>
+        <span class="stage-dot" style="--i:2"></span>
+        <span class="stage-dot" style="--i:3"></span>
+        <span class="stage-dot" style="--i:4"></span>
+      </div>
+      <p class="mode" id="mode"></p>
+    </div>
   </header>
 
   <main class="canvas-wrap" id="canvasWrap">
@@ -33,10 +42,14 @@
   <footer class="foot" id="footNote"></footer>
 </div>
 
-<aside class="panel" id="panel" hidden>
-  <button class="panel-close" id="panelClose" aria-label="Close">&times;</button>
-  <div id="panelBody"></div>
-</aside>
+<div class="panel-backdrop" id="panelBackdrop" hidden>
+  <aside class="panel" id="panel" role="dialog" aria-label="Tool detail">
+    <button class="panel-close" id="panelClose" aria-label="Close">
+      <svg viewBox="0 0 24 24" fill="none"><line x1="6" y1="6" x2="18" y2="18"/><line x1="18" y1="6" x2="6" y2="18"/></svg>
+    </button>
+    <div class="panel-inner" id="panelBody"></div>
+  </aside>
+</div>
 
 <script src="app.js"></script>
 </body>
