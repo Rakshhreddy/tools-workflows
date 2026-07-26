@@ -1,8 +1,8 @@
 const SVGNS = 'http://www.w3.org/2000/svg';
 const XLINK = 'http://www.w3.org/1999/xlink';
 const FORMATS = ['svg', 'png', 'jpg', 'jpeg', 'webp', 'avif'];
-const TOP = 78;
-const BOT = 86;
+const TOP = 104;
+const BOT = 92;
 const PAD_X = 8;
 
 let DATA = null;
@@ -107,8 +107,14 @@ function computeLayout(nodes) {
   }
 
   STAGES.forEach((st, si) => {
-    const list = nodes.filter((n) => n.stage === st.id)
+    const ranked = nodes.filter((n) => n.stage === st.id)
       .sort((a, b) => b.by.length - a.by.length);
+
+    // Interleave big-to-small outward from the centre so the largest tiles
+    // land mid-column (never jammed under the stage label) and each band uses
+    // its full height instead of stacking top-heavy.
+    const list = [];
+    ranked.forEach((n, k) => (k % 2 ? list.push(n) : list.unshift(n)));
 
     // Spread each column across the full canvas height so no quadrant is
     // starved. Nodes bias toward what they connect to, but the base
@@ -125,7 +131,7 @@ function computeLayout(nodes) {
       const pull = links.length
         ? links.reduce((s, m) => s + m.lane, 0) / links.length
         : spread;
-      const target = spread * 0.62 + pull * 0.38;
+      const target = spread * 0.72 + pull * 0.28;
 
       let best = 0, bestScore = Infinity;
       for (let lane = 0; lane < LANES; lane++) {
@@ -139,14 +145,15 @@ function computeLayout(nodes) {
   });
 
   // Anything still crowding a neighbour moves to open space, first sideways
-  // within its own band, then to an adjacent lane.
-  for (let pass = 0; pass < 4; pass++) {
+  // within its own band, then to an adjacent lane. Offsets are wide enough to
+  // clear the same-lane spacing threshold even for two large tiles.
+  for (let pass = 0; pass < 6; pass++) {
     placed.forEach((n) => {
       if (clear(n, n.lane, n.x)) return;
       const st = STAGES.find((s) => s.id === n.stage);
-      for (const dx of [34, -34, 68, -68]) {
+      for (const dx of [40, -40, 80, -80, 120, -120]) {
         const x = n.x + dx;
-        if (x > st.x0 + n.r + 10 && x < st.x0 + st.w - n.r - 10 && clear(n, n.lane, x)) { n.x = x; return; }
+        if (x > st.x0 + n.r + 8 && x < st.x0 + st.w - n.r - 8 && clear(n, n.lane, x)) { n.x = x; return; }
       }
       for (const lane of [n.lane - 1, n.lane + 1, n.lane - 2, n.lane + 2]) {
         if (lane < 0 || lane >= LANES) continue;
