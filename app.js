@@ -1,6 +1,6 @@
 const SVGNS = 'http://www.w3.org/2000/svg';
 const XLINK = 'http://www.w3.org/1999/xlink';
-const FORMATS = ['svg', 'png', 'jpg', 'jpeg', 'webp'];
+const FORMATS = ['svg', 'png', 'jpg', 'jpeg', 'webp', 'avif'];
 const TOP = 78;
 const BOT = 86;
 const PAD_X = 8;
@@ -195,16 +195,7 @@ function render(nodes) {
     dx: '0', dy: '3', stdDeviation: '4', 'flood-color': '#000', 'flood-opacity': '0.55'
   }));
   defs.appendChild(lift);
-
-  // Faint dot grid, so the canvas reads as a surface rather than a void.
-  const dots = el('pattern', {
-    id: 'dots', width: '26', height: '26', patternUnits: 'userSpaceOnUse'
-  });
-  dots.appendChild(el('circle', { cx: '1', cy: '1', r: '1', fill: 'var(--grid)' }));
-  defs.appendChild(dots);
   svg.appendChild(defs);
-
-  svg.appendChild(el('rect', { x: 0, y: 0, width: W, height: H, fill: 'url(#dots)' }));
 
   const gBands = el('g');
   STAGES.forEach((st, i) => {
