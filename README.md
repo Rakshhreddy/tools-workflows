@@ -10,21 +10,23 @@ python3 -m http.server 8932
 
 ## What it shows
 
-Tools are grouped into the five stages every designer in the corpus moves through:
+Tools are grouped into the phases every designer in the corpus moves through:
 
-| Stage | Meaning |
+| Phase | Meaning |
 |---|---|
-| 1 Gather | Signal in: inspiration, customer voice, what was said in the room |
-| 2 Frame | Turning raw signal into something you can act on |
-| 3 Explore | Going wide and rough, nothing precious |
-| 4 Build | Making it real in code, against the real design system |
-| 5 Ship | Out to engineers, stakeholders and production |
+| Gather | Signal in: inspiration, customer voice, what was said in the room |
+| Frame | Turning raw signal into something you can act on |
+| Explore | Going wide and rough, nothing precious |
+| Build | Making it real in code, against the real design system |
+| Ship | Out to engineers, stakeholders and production |
 
-The stage axis is grounded in the sources, not invented. Danny Williams describes the explore to refine spine himself at 10:52, and Kazden Cattapan describes diverging then converging at 10:42.
+They are not numbered anywhere in the interface. Numbering would assert an order the sources do not claim: people enter wherever the work starts, and movement runs both ways. Left to right carries the flow on its own.
+
+The axis is grounded in the sources, not invented. Danny Williams describes the explore to refine spine himself at 10:52, and Kazden Cattapan describes diverging then converging at 10:42.
 
 Three levels of depth:
 
-1. **Landscape.** Every tool, sized by how many designers use it, with dotted lines showing real handoffs.
+1. **Landscape.** Every tool, sized by how widely it is used, with dotted lines showing real handoffs.
 2. **Company.** Selecting a company narrows to its flow. Companies with more than one designer reveal nested chips.
 3. **Designer.** Narrows to one person. Hover overlays and the side panel scope to them.
 
@@ -37,7 +39,9 @@ Four rules. If a change cannot be justified by one of them, it does not ship.
 3. **Size is the only quantitative encoding.** No opacity ramps, no stroke width variation.
 4. **One line style.** Dotted, arrowhead for direction.
 
-Copy discipline: no legend explaining the encodings, and no em dashes anywhere.
+Copy discipline: no legend explaining the encodings, no counts or rankings in the interface, and no em dashes anywhere. Labels carry the stage and the people, because this is one designer's workflow at one company, not a popularity contest.
+
+The side panel invents no chrome of its own. It reuses the canvas vocabulary, so each kind of claim has a shape you can read at scroll speed: the header is a vertical slice of the graph, a quote carries no tile, a handoff leads with the other tool's mark, and a choice leads with both.
 
 ## Structure
 
@@ -104,4 +108,4 @@ All sources are [Sneak Peek](https://sneakpeek.design) interviews.
 
 ## A note on the sample
 
-These are designers who chose to record a workflow walkthrough, which is not a random sample of the profession. Counts are shown as raw numbers against a visible denominator for that reason. Nothing here is presented as a percentage of designers generally.
+These are designers who chose to record a workflow walkthrough, which is not a random sample of the profession. So nothing is counted or ranked in the interface. Tile size is a soft weight and nothing more, and every claim on screen is attributed to the person who said it, at the moment they said it.

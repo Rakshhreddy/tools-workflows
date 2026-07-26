@@ -126,7 +126,6 @@ html, body {
 .tile { fill: var(--tile); transition: opacity .2s, transform .18s ease; transform-box: fill-box; transform-origin: center; }
 .node:hover .tile { transform: scale(1.05); }
 .node-label { fill: var(--ink-2); text-anchor: middle; pointer-events: none; }
-.node-count { fill: var(--ink-3); text-anchor: middle; pointer-events: none; font-size: 10px; }
 .node-mark { pointer-events: none; }
 .node-mono { font-weight: 700; text-anchor: middle; pointer-events: none; fill: #2a2a2a; }
 .node:focus { outline: none; }
@@ -162,6 +161,7 @@ html, body {
 .foot a { color: var(--ink-3); text-decoration: none; }
 .foot a:hover { color: var(--ink); }
 .foot .sep { margin: 0 9px; color: rgba(237, 237, 237, 0.16); }
+.foot .lead { margin-right: 11px; color: rgba(237, 237, 237, 0.26); }
 
 /* ---------- tooltip ---------- */
 
@@ -199,19 +199,35 @@ html, body {
   width: min(420px, 92vw);
   background: var(--surface);
   border-left: 0.5px solid var(--line);
-  padding: 28px 26px 40px;
+  /* No top padding: a sticky heading pins against the scroll container's
+   * padding box, so 28px here would park every heading 28px down and leave a
+   * strip of content sliding past above it. The inset lives on the body. */
+  padding: 0 26px 40px;
+  /* overflow-y alone would compute overflow-x to auto, and the headings bleed
+   * to the exact panel edge, so any drift would raise a sideways scrollbar. */
+  overflow-x: hidden;
   overflow-y: auto;
   z-index: 20;
   box-shadow: -24px 0 70px rgba(0, 0, 0, .5);
 }
+/* Fixed, not absolute: absolute would scroll away with the content, and the
+ * sticky section headings would paint over it on the way past. */
 .panel-close {
-  position: absolute; top: 18px; right: 18px;
+  position: fixed; top: 18px; right: 18px; z-index: 3;
   border: none; background: none; color: var(--ink-3);
   font-size: 20px; line-height: 1; cursor: pointer; padding: 4px 8px;
 }
 .panel-close:hover { color: var(--ink); }
 
-.panel-head { display: flex; align-items: center; gap: 13px; margin-bottom: 24px; }
+/* Header as a vertical slice of the graph: what feeds in, this tool, where it
+ * goes. Everything is aligned to one spine at x=20, the centre of the 40px
+ * mark, so it reads as a diagram rather than three stacked elements. */
+#panelBody { padding-top: 28px; }
+.panel-head { margin-bottom: 26px; }
+.panel-id { display: flex; align-items: center; gap: 13px; }
+.flow-row { display: flex; flex-wrap: wrap; gap: 7px; margin-left: 7px; }
+.flow-arrow { display: block; width: 10px; height: 22px; margin-left: 15px; }
+
 .panel-mark {
   width: 40px; height: 40px; flex: none; border-radius: 10px;
   background: var(--tile);
@@ -222,17 +238,58 @@ html, body {
 .panel h2 { margin: 0; font-size: 17px; font-weight: 600; letter-spacing: -0.01em; }
 .panel .kind { margin: 3px 0 0; }
 
+/* Light tiles, same as the canvas, so a mark in the panel means what it means
+ * out there: a tool you can go to. */
+.flow-tile, .row-tile {
+  border: 0; padding: 0; cursor: pointer; flex: none;
+  background: var(--tile); font-family: inherit;
+  display: flex; align-items: center; justify-content: center;
+  transition: transform .18s ease;
+}
+.flow-tile { width: 26px; height: 26px; border-radius: 8px; }
+.row-tile  { width: 24px; height: 24px; border-radius: 7px; }
+.flow-tile:hover, .row-tile:hover { transform: scale(1.08); }
+.flow-tile svg, .flow-tile img { width: 15px; height: 15px; }
+.row-tile svg,  .row-tile img  { width: 14px; height: 14px; }
+.mono { font-weight: 700; color: #2a2a2a; }
+.panel-mark .mono { font-size: 13px; }
+.flow-tile .mono { font-size: 9px; }
+.row-tile .mono { font-size: 8.5px; }
+span.row-tile { cursor: default; }
+
 .sect { margin-bottom: 24px; }
-.sect h3 { margin: 0 0 11px; }
+/* Pinned, so the direction arrow stays on screen for every row under it.
+ * Negative margins bleed the background over the panel's 26px padding. */
+.sect h3 {
+  position: sticky; top: 0; z-index: 2;
+  margin: 0 -26px 11px; padding: 10px 26px 9px;
+  background: var(--surface);
+}
+.sect h3 .dir { margin-left: 7px; color: var(--ink-2); }
 
 .item { padding: 11px 0; border-top: 0.5px solid var(--line); }
-.item:first-of-type { border-top: none; padding-top: 0; }
+.sect > .item:first-of-type { border-top: none; padding-top: 0; }
 .item p { margin: 0 0 6px; font-size: 13.5px; line-height: 1.55; color: var(--ink); }
 
-.by { display: flex; align-items: center; gap: 7px; font-size: 11.5px; color: var(--ink-3); }
-.by .swatch { width: 5px; height: 5px; border-radius: 50%; background: var(--accent); flex: none; }
+/* One tile: a handoff, one named tool. */
+.item-tool { display: grid; grid-template-columns: 24px 1fr; gap: 11px; align-items: start; }
+.item-name { font-weight: 600; margin-bottom: 2px !important; }
+
+/* Two tiles: a choice. No other row in the panel has this shape. */
+.item-pair .pair { display: flex; align-items: center; gap: 6px; margin-bottom: 9px; }
+.pair-name { font-size: 13px; font-weight: 600; color: var(--ink); }
+.pair-sep { font-size: 11.5px; color: var(--ink-3); margin: 0 3px; }
+
+.by { font-size: 11.5px; line-height: 1.5; color: var(--ink-3); }
 .by a { color: var(--ink-2); text-decoration: none; border-bottom: 1px solid var(--line-2); }
 .by a:hover { color: var(--ink); }
+
+/* font-family only, so the .micro sizing on the element still applies. */
+.more {
+  border: 0; background: none; cursor: pointer; font-family: inherit;
+  padding: 12px 0 0; color: var(--ink-3);
+}
+.more:hover { color: var(--ink); }
 
 .empty { font-size: 13px; color: var(--ink-3); }
 

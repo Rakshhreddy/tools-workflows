@@ -35,6 +35,11 @@ const firmOf = (designerId) => byId(DATA.companies, who(designerId).companyId);
 const staffOf = (companyId) => DATA.designers.filter((p) => p.companyId === companyId);
 const deepLink = (p, at) => `${p.source.url}&t=${at}s`;
 const firstName = (n) => n.split(' ')[0];
+const stageOf = (n) => STAGES.find((s) => s.id === n.stage);
+const stageLabel = (n) => (stageOf(n) || {}).label || '';
+const andList = (items) => items.length < 2
+  ? items.join('')
+  : `${items.slice(0, -1).join(', ')} and ${items[items.length - 1]}`;
 
 /** Everyone currently in scope: all, one company's people, or one person. */
 function scope() {
@@ -273,8 +278,10 @@ function render(nodes) {
       x1: st.x0, y1: 24, x2: st.x0, y2: H - 22,
       stroke: 'var(--line)', 'stroke-width': '1'
     }));
+    // No number on the label. These are phases, not steps, and people enter
+    // wherever the work starts. Left to right already carries the flow.
     const lab = el('text', { class: 'band-label', x: st.x0 + 16, y: 34 });
-    lab.textContent = `${i + 1} ${st.label}`;
+    lab.textContent = st.label;
     gBands.appendChild(lab);
   });
   svg.appendChild(gBands);
@@ -313,7 +320,7 @@ function render(nodes) {
 
   nodes.forEach((n, i) => {
     const g = el('g', { class: 'node', tabindex: '0', role: 'button', transform: `translate(${n.x},${n.y})` });
-    g.setAttribute('aria-label', `${n.name}, used by ${n.by.length} of ${DATA.designers.length} designers`);
+    g.setAttribute('aria-label', `${n.name}, ${stageLabel(n)} stage`);
     g.style.animationDelay = `${i * 22}ms`;
 
     g.appendChild(el('rect', {
@@ -484,7 +491,8 @@ function renderSummary() {
       const p = staff[0];
       el2.innerHTML = `<b>${c.name}</b><span class="role">, ${p.name}, ${p.role}.</span> ${p.thesis}`;
     } else {
-      el2.innerHTML = `<b>${c.name}</b><span class="role">, ${staff.length} designers.</span> Pick one to narrow the workflow.`;
+      const names = andList(staff.map((p) => p.name));
+      el2.innerHTML = `<b>${c.name}</b><span class="role">, ${names}.</span> Pick one to see their workflow.`;
     }
     return;
   }
@@ -493,28 +501,36 @@ function renderSummary() {
 
 /* ---------- tooltip ---------- */
 
+// Nothing is counted or ranked in the copy. This is one designer's workflow at
+// one company, not a popularity contest, so labels carry the stage and the
+// people rather than a tally. Size stays the only quantitative encoding.
+
 const tipRow = (text, designerId) =>
   `<span class="tip-row"><span class="dot"></span>${text} <i>${firstName(who(designerId).name)}, ${firmOf(designerId).name}</i></span>`;
 
 function tipNode(ev, n) {
   const uses = DATA.uses.filter((u) => u.toolId === n.id && inScope(u.designerId));
   const shown = uses.slice(0, 3).map((u) => tipRow(u.purpose, u.designerId)).join('');
-  const more = uses.length > 3 ? `<span class="tip-more micro">plus ${uses.length - 3} more</span>` : '';
-  const count = focused()
-    ? `${firmOf(scope()[0]).name}`
-    : `${n.by.length} of ${DATA.designers.length} designers`;
-  $('tip').innerHTML = `<b>${n.name}</b><span class="tip-count micro">${count}</span>${shown ||
-    '<span class="tip-row">Named as a step between other tools.</span>'}${more}`;
+  const more = uses.length > 3 ? `<span class="tip-more micro">Click to read the rest</span>` : '';
+  const kicker = focused()
+    ? `${stageLabel(n)} &middot; ${firmOf(scope()[0]).name}`
+    : stageLabel(n);
+  $('tip').innerHTML = `<b>${n.name}</b><span class="tip-count micro">${kicker}</span>${shown ||
+    '<span class="tip-row">Mentioned only as a step between other tools.</span>'}${more}`;
   $('tip').hidden = false;
   moveTip(ev);
 }
 
 function tipEdge(ev, e) {
-  const by = e.by.filter((m) => inScope(m.designerId));
-  const rows = by.map((m) => tipRow(m.reason, m.designerId)).join('');
+  const from = byId(NODES, e.from), to = byId(NODES, e.to);
+  const rows = e.by.filter((m) => inScope(m.designerId))
+    .map((m) => tipRow(m.reason, m.designerId)).join('');
+  const kicker = from.stage === to.stage
+    ? `Within ${stageLabel(from)}`
+    : `${stageLabel(from)} to ${stageLabel(to)}`;
   $('tip').innerHTML =
-    `<b>${byId(NODES, e.from).name} to ${byId(NODES, e.to).name}</b>` +
-    `<span class="tip-count micro">${by.length === 1 ? '1 designer' : `${by.length} designers`}</span>${rows}`;
+    `<b>${from.name} to ${to.name}</b>` +
+    `<span class="tip-count micro">${kicker}</span>${rows}`;
   $('tip').hidden = false;
   moveTip(ev);
 }
@@ -535,10 +551,36 @@ const hideTip = () => { $('tip').hidden = true; };
 
 function markHTML(n) {
   const m = MARKS[n.id];
-  if (!m) return `<span style="font-weight:700;font-size:13px">${n.mono}</span>`;
+  // Sizing lives in CSS, keyed off the tile class, because the same mark is
+  // drawn at 40px in the header and 20px in a row. Playground has no logo
+  // file, so the monogram fallback is a live case, not a theoretical one.
+  if (!m) return `<span class="mono">${n.mono}</span>`;
   if (m.type === 'img') return `<img src="${m.src}" alt="">`;
   return `<svg viewBox="${m.viewBox}" style="color:${m.mono ? '#2a2a2a' : 'inherit'}">${m.inner}</svg>`;
 }
+
+/** A light tile carrying a tool's mark, which opens that tool when clicked. */
+const toolTile = (n, cls) =>
+  `<button class="${cls}" type="button" data-tool="${n.id}" aria-label="Open ${n.name}">${markHTML(n)}</button>`;
+
+// The panel speaks the canvas language, so the connector is the same line the
+// edges are: dotted, with the arrowhead carrying direction.
+const flowArrow = () =>
+  `<svg class="flow-arrow" viewBox="0 0 10 22" aria-hidden="true">` +
+  `<line x1="5" y1="0" x2="5" y2="14" stroke="var(--edge)" stroke-width="1" stroke-dasharray="2 5"/>` +
+  `<path d="M1.2,14 L8.8,14 L5,21 z" fill="var(--edge)"/></svg>`;
+
+/** Distinct neighbour tools on one side of a node, in canvas order. */
+function neighbours(edges, key) {
+  const ids = [...new Set(edges.map((e) => e[key]))];
+  return ids.map((id) => byId(NODES, id)).filter(Boolean)
+    .sort((a, b) => STAGES.findIndex((s) => s.id === a.stage) - STAGES.findIndex((s) => s.id === b.stage)
+      || a.name.localeCompare(b.name));
+}
+
+// Long sections open folded, so every panel starts at a length you can take in.
+// Only the hub tools (Figma, Cursor, Claude Code, Git) ever trip this.
+const SHOWN = 5;
 
 function openPanel(n) {
   const uses = DATA.uses.filter((u) => u.toolId === n.id && inScope(u.designerId));
@@ -547,37 +589,77 @@ function openPanel(n) {
   const outs = EDGES.filter((e) => e.from === n.id && rel(e));
   const ins = EDGES.filter((e) => e.to === n.id && rel(e));
 
-  const row = (text, designerId, at) => {
+  const byline = (designerId, at) => {
     const p = who(designerId);
-    return `<div class="item"><p>${text}</p><div class="by">` +
-      `<span class="swatch"></span>${p.name}, ${firmOf(designerId).name}` +
-      ` &middot; <a href="${deepLink(p, at)}" target="_blank" rel="noopener">${stamp(at)}</a></div></div>`;
+    return `<div class="by">${p.name}, ${firmOf(designerId).name}` +
+      ` &middot; <a href="${deepLink(p, at)}" target="_blank" rel="noopener">${stamp(at)}</a></div>`;
   };
-  const edgeRows = (list, dir) => list.flatMap((e) =>
+
+  // Three silhouettes, one per kind of claim. A quote is testimony and carries
+  // no tile. A handoff is one tool, so it leads with that tool's mark. A choice
+  // is a pair, so it leads with both. You can tell them apart at scroll speed
+  // without reading the heading.
+  const quoteRow = (text, designerId, at) =>
+    `<div class="item"><p>${text}</p>${byline(designerId, at)}</div>`;
+
+  const toolRow = (other, text, designerId, at) =>
+    `<div class="item item-tool">${toolTile(other, 'row-tile')}` +
+    `<div><p class="item-name">${other.name}</p><p>${text}</p>${byline(designerId, at)}</div></div>`;
+
+  const pairRow = (other, text, designerId, at) =>
+    `<div class="item item-pair"><div class="pair">` +
+    `<span class="row-tile">${markHTML(n)}</span><span class="pair-name">${n.name}</span>` +
+    `<span class="pair-sep">or</span>` +
+    `${toolTile(other, 'row-tile')}<span class="pair-name">${other.name}</span></div>` +
+    `<p>${text}</p>${byline(designerId, at)}</div>`;
+
+  const edgeRows = (list, key) => list.flatMap((e) =>
     e.by.filter((m) => inScope(m.designerId))
-      .map((m) => row(`<b>${byId(NODES, dir === 'out' ? e.to : e.from).name}</b>: ${m.reason}`, m.designerId, m.at))
-  ).join('');
+      .map((m) => toolRow(byId(NODES, e[key]), m.reason, m.designerId, m.at))
+  );
 
-  const st = STAGES.find((s) => s.id === n.stage);
-  const scopeLabel = focused() ? firmOf(scope()[0]).name : `${n.by.length} of ${DATA.designers.length}`;
-  let html = `<div class="panel-head"><div class="panel-mark">${markHTML(n)}</div>` +
-    `<div><h2>${n.name}</h2><p class="kind micro">${st ? st.label : ''} &middot; ${scopeLabel}</p></div></div>`;
+  // Direction lives in the heading, which is pinned while you read the rows
+  // under it. That is what lets both handoff buckets share one row shape.
+  const section = (title, dir, rows) => {
+    if (!rows.length) return '';
+    const head = `<h3 class="micro">${title}${dir ? `<span class="dir">${dir}</span>` : ''}</h3>`;
+    if (rows.length <= SHOWN) return `<div class="sect">${head}${rows.join('')}</div>`;
+    return `<div class="sect">${head}${rows.slice(0, SHOWN).join('')}` +
+      `<div class="rest" hidden>${rows.slice(SHOWN).join('')}</div>` +
+      `<button class="more micro" type="button" aria-expanded="false">Show all</button></div>`;
+  };
 
-  html += `<div class="sect"><h3 class="micro">What it is used for</h3>`;
-  html += uses.length ? uses.map((u) => row(u.purpose, u.designerId, u.at)).join('')
-    : `<p class="empty">Named as a step between other tools, with no direct use described.</p>`;
-  html += `</div>`;
+  const tiles = (list, cls) => list.length
+    ? `<div class="flow-row">${list.map((m) => toolTile(m, cls)).join('')}</div>` : '';
 
-  if (choices.length) {
-    html += `<div class="sect"><h3 class="micro">When to reach for it</h3>` + choices.map((c) => {
-      const other = byId(NODES, c.a === n.id ? c.b : c.a);
-      return row(`<em>versus ${other ? other.name : ''}</em>: ${c.criterion}`, c.designerId, c.at);
-    }).join('') + `</div>`;
-  }
-  if (outs.length) html += `<div class="sect"><h3 class="micro">Leads to</h3>${edgeRows(outs, 'out')}</div>`;
-  if (ins.length) html += `<div class="sect"><h3 class="micro">Fed by</h3>${edgeRows(ins, 'in')}</div>`;
+  // The header is a vertical slice of the graph: what feeds in, this tool,
+  // where it goes. Answers "where does this sit" before a word is read.
+  const kind = focused()
+    ? `${stageLabel(n)} &middot; ${firmOf(scope()[0]).name}`
+    : stageLabel(n);
+  const feeds = neighbours(ins, 'from');
+  const leads = neighbours(outs, 'to');
+
+  let html = `<div class="panel-head">` +
+    (feeds.length ? tiles(feeds, 'flow-tile') + flowArrow() : '') +
+    `<div class="panel-id"><div class="panel-mark">${markHTML(n)}</div>` +
+    `<div><h2>${n.name}</h2><p class="kind micro">${kind}</p></div></div>` +
+    (leads.length ? flowArrow() + tiles(leads, 'flow-tile') : '') +
+    `</div>`;
+
+  html += uses.length
+    ? section('Used for', '', uses.map((u) => quoteRow(u.purpose, u.designerId, u.at)))
+    : `<div class="sect"><h3 class="micro">Used for</h3>` +
+      `<p class="empty">Mentioned only as a step between other tools.</p></div>`;
+  html += section('Fed by', '&larr;', edgeRows(ins, 'from'));
+  html += section('Leads to', '&rarr;', edgeRows(outs, 'to'));
+  html += section('Versus', '', choices.map((c) => {
+    const other = byId(NODES, c.a === n.id ? c.b : c.a);
+    return other ? pairRow(other, c.criterion, c.designerId, c.at) : '';
+  }).filter(Boolean));
 
   $('panelBody').innerHTML = html;
+  $('panel').scrollTop = 0;
   $('panel').hidden = false;
 }
 
@@ -643,12 +725,31 @@ async function boot() {
 
   await loadMarks(NODES.map((n) => n.id));
 
-  $('footNote').innerHTML = DATA.designers.map((p) =>
-    `<a href="${p.source.url}" target="_blank" rel="noopener">${p.name}</a>`
-  ).join('<span class="sep">/</span>');
+  $('footNote').innerHTML = `<span class="lead">From interviews with</span>` +
+    DATA.designers.map((p) =>
+      `<a href="${p.source.url}" target="_blank" rel="noopener">${p.name}</a>`
+    ).join('<span class="sep">/</span>');
 
   draw();
   $('panelClose').addEventListener('click', () => { $('panel').hidden = true; });
+
+  // Every tile in the panel is a way through the graph, so the panel browses
+  // like the canvas does.
+  $('panelBody').addEventListener('click', (ev) => {
+    const tile = ev.target.closest('[data-tool]');
+    if (tile) {
+      const next = byId(NODES, tile.dataset.tool);
+      if (next) openPanel(next);
+      return;
+    }
+    const more = ev.target.closest('.more');
+    if (!more) return;
+    const rest = more.previousElementSibling;
+    const open = rest.hidden;
+    rest.hidden = !open;
+    more.setAttribute('aria-expanded', String(open));
+    more.textContent = open ? 'Show less' : 'Show all';
+  });
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') { $('panel').hidden = true; hideTip(); }
   });
