@@ -70,6 +70,31 @@ handoff[]   { designerId, claim, at }
 
 Node size counts **distinct designers**, so two people at one company never double count a tool.
 
+## Encoding standard
+
+The interface computes its findings from this file rather than from anything written by hand, so consistency across interviews is what keeps those findings true. Encode to this standard, and run the validator before shipping.
+
+| record | encode when | do not encode when |
+|---|---|---|
+| `use` | they say what they do with a tool | they only name the tool in passing |
+| `move` | they describe going from one named tool to another, **and give a reason** | the order is implied but never stated |
+| `choice` | they compare two tools and say what decides between them | they merely prefer one, with no criterion |
+| `handoff` | they describe how finished work reaches engineering | they discuss collaboration generally |
+
+Rules that hold across all of them:
+
+1. **Quote, do not paraphrase into a claim.** The wording should be theirs, tightened only for length.
+2. **Every record carries `at`**, the second it was said. A record without a real timestamp cannot be checked, so it does not go in.
+3. **A `move` needs its reason.** The handoffs are the part of this corpus that does not exist anywhere else. A move with no stated reason is just an ordering, and the chapter list already gives you that.
+4. **Encode every interview to the same depth.** Skimming one and mining another makes the thin designer look like a minimalist. `validate.py` warns when someone falls below half the typical depth.
+5. **Never invent a record to fill a gap.** An absent tool is a fact about the interview.
+
+```bash
+python3 scripts/validate.py
+```
+
+Checks referential integrity, required fields, timestamp sanity and orphaned tools; fails on errors and warns on uneven depth.
+
 ## Adding a logo
 
 Drop a file into `assets/logos/` named exactly `<tool-id>.<ext>`, where the id is the key in `landscape.json`. Formats tried in order: svg, png, jpg, jpeg, webp. Anything missing falls back to a monogram, so assets can be added incrementally.

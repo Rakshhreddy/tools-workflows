@@ -57,7 +57,7 @@ html, body {
   flex-wrap: wrap;
 }
 
-.lede { margin: 0; max-width: 52ch; line-height: 1.55; font-size: 14.5px; }
+.lede { margin: 0; flex: 0 1 auto; max-width: 52ch; line-height: 1.55; font-size: 14.5px; }
 .title { font-weight: 600; letter-spacing: -0.015em; color: var(--ink); }
 .sub { color: var(--ink-2); }
 
@@ -99,8 +99,135 @@ html, body {
 .mode b { color: var(--ink); font-weight: 600; }
 .mode .role { color: var(--ink-3); }
 
-.rails { display: flex; flex-direction: column; align-items: flex-end; gap: 8px; }
-.who, .who-sub { display: flex; gap: 6px; flex-wrap: wrap; justify-content: flex-end; }
+/* The rail takes the space the lede does not, and shrinks below its content
+ * width rather than wrapping the header onto a second line. min-width:0 is what
+ * lets a flex child actually shrink, and it is what makes the scroller engage. */
+.rails { display: flex; flex-direction: column; align-items: flex-end; gap: 8px; flex: 1 1 300px; min-width: 0; }
+.who-sub { display: flex; gap: 6px; flex-wrap: wrap; justify-content: flex-end; }
+
+/* ---------- company rail ----------
+ * Scrolls rather than wraps, so the header keeps its shape however many
+ * companies the corpus grows to. Arrows and fades only appear once something
+ * is genuinely out of view, so nothing changes until it needs to. */
+
+.who-rail { display: flex; align-items: center; gap: 4px; max-width: 100%; min-width: 0; }
+
+.who-scroll {
+  overflow-x: auto;
+  scrollbar-width: none;
+  scroll-behavior: smooth;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+.who-scroll::-webkit-scrollbar { display: none; }
+.who { display: flex; gap: 6px; width: max-content; }
+
+/* Fade the edge that still has content behind it. mask-image rather than a
+ * gradient overlay, so it works over the page background whatever that is. */
+.who-scroll.fade-r { mask-image: linear-gradient(to right, #000 82%, transparent 100%); }
+.who-scroll.fade-l { mask-image: linear-gradient(to left, #000 82%, transparent 100%); }
+.who-scroll.fade-l.fade-r {
+  mask-image: linear-gradient(to right, transparent 0%, #000 12%, #000 88%, transparent 100%);
+}
+
+.rail-arrow {
+  flex: none;
+  width: 24px; height: 24px; padding: 0;
+  display: flex; align-items: center; justify-content: center;
+  border: 0.5px solid var(--line);
+  border-radius: 50%;
+  background: var(--surface);
+  color: var(--ink-2);
+  cursor: pointer;
+  transition: border-color .2s, color .2s;
+}
+/* display:flex above would otherwise beat the UA's [hidden] rule and leave the
+ * arrows on screen when there is nothing to scroll to. */
+.rail-arrow[hidden] { display: none; }
+.rail-arrow:hover { border-color: var(--line-2); color: var(--ink); }
+.rail-arrow svg { width: 13px; height: 13px; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+
+/* ---------- search ---------- */
+
+.find { position: relative; }
+.find-input {
+  width: 232px;
+  padding: 6px 40px 6px 12px;
+  border: 0.5px solid var(--line);
+  border-radius: 100px;
+  background: transparent;
+  font: inherit;
+  font-size: 12.5px;
+  color: var(--ink);
+  transition: border-color .2s, width .2s;
+}
+.find-input::placeholder { color: var(--ink-3); }
+.find-input:focus { outline: none; border-color: var(--line-2); width: 268px; }
+.find-input::-webkit-search-cancel-button { display: none; }
+
+.find-key {
+  position: absolute; top: 50%; right: 11px;
+  transform: translateY(-50%);
+  pointer-events: none;
+  font-family: inherit; font-size: 10px;
+  color: var(--ink-3);
+  letter-spacing: 0.5px;
+}
+.find-input:focus + .find-key { opacity: 0; }
+
+.find-results {
+  position: absolute; z-index: 30;
+  top: calc(100% + 6px); right: 0;
+  width: 268px;
+  padding: 5px;
+  background: var(--surface);
+  border: 0.5px solid var(--line-2);
+  border-radius: 11px;
+  box-shadow: 0 16px 44px rgba(0, 0, 0, .55);
+  max-height: 300px; overflow-y: auto;
+}
+.find-hit {
+  display: block; width: 100%;
+  padding: 7px 9px;
+  border: 0; border-radius: 7px;
+  background: none;
+  font: inherit; font-size: 12.5px;
+  color: var(--ink);
+  text-align: left; cursor: pointer;
+}
+.find-hit[aria-selected="true"], .find-hit:hover { background: var(--surface-2); }
+.find-hint { display: block; font-size: 11px; color: var(--ink-3); margin-top: 1px; }
+.find-empty { margin: 0; padding: 8px 9px; font-size: 12.5px; color: var(--ink-3); }
+
+/* ---------- findings ----------
+ * What the corpus shows, as the way in. Quiet by default, because the map is
+ * still the thing; they read as a line of claims, not as buttons. */
+
+.findings {
+  display: flex; flex-wrap: wrap; gap: 0 22px;
+  padding: 11px 0 13px;
+  border-bottom: 0.5px solid var(--line);
+}
+.finding {
+  border: 0; padding: 0; background: none;
+  font: inherit; font-size: 12.5px;
+  color: var(--ink-2);
+  cursor: pointer;
+  border-bottom: 1px solid transparent;
+  transition: color .2s, border-color .2s;
+}
+.finding:hover { color: var(--ink); border-bottom-color: var(--line-2); }
+
+.finding-id { align-items: flex-start; }
+.finding-blurb {
+  margin: 12px 0 0;
+  font-size: 13.5px; line-height: 1.55;
+  color: var(--ink-2);
+}
+
+/* Tile grid for the core-and-tail finding. Named groups, never a tally. */
+.grid-tiles { display: flex; flex-wrap: wrap; gap: 10px 14px; }
+.grid-cell { display: flex; align-items: center; gap: 7px; font-size: 12.5px; color: var(--ink); }
 
 .chip {
   padding: 5px 13px;

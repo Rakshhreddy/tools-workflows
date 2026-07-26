@@ -12,6 +12,9 @@ let MARKS = {};
 let STAGES = [];
 let company = null;   // level 2
 let person = null;    // level 3
+let SEARCH = [];
+let openTool = null;    // tool panel currently open, so the URL can carry it
+let openFindingId = null;
 let W = 1200, H = 700;
 
 const $ = (id) => document.getElementById(id);
@@ -40,6 +43,33 @@ const stageLabel = (n) => (stageOf(n) || {}).label || '';
 const andList = (items) => items.length < 2
   ? items.join('')
   : `${items.slice(0, -1).join(', ')} and ${items[items.length - 1]}`;
+
+/* ---------- shareable state ----------
+ * Any view can be linked to and cited, which is also how a finding points at
+ * its own evidence on the map. replaceState, not pushState: filtering is not
+ * navigation, and it should not fill up the back button. */
+
+function writeURL() {
+  const q = new URLSearchParams();
+  if (person) q.set('designer', person);
+  else if (company) q.set('company', company);
+  // Whatever is open is part of the view, so a copied URL reopens it.
+  if (openTool) q.set('tool', openTool);
+  if (openFindingId) q.set('finding', openFindingId);
+  const s = q.toString();
+  history.replaceState(null, '', s ? `?${s}` : location.pathname);
+}
+
+function readURL() {
+  const q = new URLSearchParams(location.search);
+  const d = q.get('designer');
+  if (d && who(d)) { person = d; company = who(d).companyId; }
+  else {
+    const c = q.get('company');
+    if (c && byId(DATA.companies, c)) company = c;
+  }
+  return { tool: q.get('tool'), finding: q.get('finding') };
+}
 
 /** Everyone currently in scope: all, one company's people, or one person. */
 function scope() {
@@ -437,6 +467,7 @@ function draw() {
   render(nodes);
   renderRails();
   renderSummary();
+  writeURL();
 
   // Play the entrance once, on first paint only.
   if (!draw.booted) {
@@ -446,6 +477,20 @@ function draw() {
       setTimeout(() => svg.classList.remove('intro'), 1300);
     }
   }
+}
+
+/** Pick a company, or clear it by picking it again. */
+function selectCompany(id, { toggle = true } = {}) {
+  company = toggle && company === id ? null : id;
+  person = null;
+  draw();
+}
+
+function selectPerson(id) {
+  const p = who(id);
+  if (!p) return;
+  if (person === id) { person = null; } else { person = id; company = p.companyId; }
+  draw();
 }
 
 function renderRails() {
@@ -461,20 +506,95 @@ function renderRails() {
     : '';
 
   document.querySelectorAll('[data-company]').forEach((c) => {
-    c.addEventListener('click', () => {
-      const id = c.dataset.company;
-      company = company === id ? null : id;
-      person = null;
-      draw();
-    });
+    c.addEventListener('click', () => selectCompany(c.dataset.company));
   });
   document.querySelectorAll('[data-person]').forEach((c) => {
-    c.addEventListener('click', () => {
-      const id = c.dataset.person;
-      person = person === id ? null : id;
-      draw();
-    });
+    c.addEventListener('click', () => selectPerson(c.dataset.person));
   });
+
+  syncRail();
+  // Keep the current company visible even when it sits off the end of the rail,
+  // which is how you arrive here from search or a shared link.
+  const active = $('who').querySelector('[aria-pressed="true"]');
+  if (active) active.scrollIntoView({ block: 'nearest', inline: 'center' });
+}
+
+/* ---------- rail ----------
+ * The rail scrolls instead of wrapping, so the header keeps its shape however
+ * many companies the corpus grows to. Arrows and edge fades only appear once
+ * there is genuinely something out of view. */
+
+function syncRail() {
+  const box = $('whoScroll');
+  if (!box) return;
+  const max = box.scrollWidth - box.clientWidth;
+  const overflowing = max > 1;
+  const x = box.scrollLeft;
+  const atStart = x <= 1;
+  const atEnd = x >= max - 1;
+
+  $('railPrev').hidden = !overflowing || atStart;
+  $('railNext').hidden = !overflowing || atEnd;
+  box.classList.toggle('fade-l', overflowing && !atStart);
+  box.classList.toggle('fade-r', overflowing && !atEnd);
+}
+
+function pageRail(dir) {
+  const box = $('whoScroll');
+  box.scrollBy({ left: dir * Math.max(160, box.clientWidth * 0.8), behavior: 'smooth' });
+}
+
+/* ---------- search ----------
+ * Companies and people share one field. Role is searchable too, so "Head of
+ * Design" finds the people it should. */
+
+function searchIndex() {
+  const rows = DATA.companies.map((c) => ({
+    kind: 'company', id: c.id, label: c.name,
+    hint: andList(staffOf(c.id).map((p) => firstName(p.name))),
+    hay: `${c.name} ${c.type} ${staffOf(c.id).map((p) => p.name + ' ' + p.role).join(' ')}`.toLowerCase()
+  }));
+  DATA.designers.forEach((p) => rows.push({
+    kind: 'designer', id: p.id, label: p.name,
+    hint: `${p.role}, ${firmOf(p.id).name}`,
+    hay: `${p.name} ${p.role} ${firmOf(p.id).name}`.toLowerCase()
+  }));
+  return rows;
+}
+
+function runSearch(term) {
+  const box = $('findResults');
+  const q = term.trim().toLowerCase();
+  if (!q) { box.hidden = true; box.innerHTML = ''; $('find').setAttribute('aria-expanded', 'false'); return; }
+
+  // Prefix matches on the label first, then anything else that contains it.
+  const hits = SEARCH.filter((r) => r.hay.includes(q)).sort((a, b) => {
+    const ap = a.label.toLowerCase().startsWith(q) ? 0 : 1;
+    const bp = b.label.toLowerCase().startsWith(q) ? 0 : 1;
+    return ap - bp || a.kind.localeCompare(b.kind) || a.label.localeCompare(b.label);
+  }).slice(0, 8);
+
+  box.innerHTML = hits.length
+    ? hits.map((r, i) => `<button class="find-hit" role="option" aria-selected="${i === 0}" ` +
+        `data-kind="${r.kind}" data-id="${r.id}">${r.label}` +
+        `<span class="find-hint">${r.hint}</span></button>`).join('')
+    : `<p class="find-empty">Nothing matches that.</p>`;
+  box.hidden = false;
+  $('find').setAttribute('aria-expanded', 'true');
+}
+
+function closeSearch(clear) {
+  $('findResults').hidden = true;
+  $('find').setAttribute('aria-expanded', 'false');
+  if (clear) $('find').value = '';
+}
+
+function takeHit(el) {
+  if (!el) return;
+  if (el.dataset.kind === 'company') selectCompany(el.dataset.id, { toggle: false });
+  else selectPerson(el.dataset.id);
+  closeSearch(true);
+  $('find').blur();
 }
 
 function renderSummary() {
@@ -585,6 +705,46 @@ function neighbours(edges, key) {
 // Only the hub tools (Figma, Cursor, Claude Code, Git) ever trip this.
 const SHOWN = 5;
 
+/* ---------- panel rows ----------
+ * Shared by tool panels and findings, so a quote looks the same wherever it is
+ * read and always carries its attribution and its timestamp back to the source.
+ *
+ * Three silhouettes, one per kind of claim. A quote is testimony and carries no
+ * tile. A handoff is one tool, so it leads with that tool's mark. A choice is a
+ * pair, so it leads with both. You can tell them apart at scroll speed without
+ * reading the heading. */
+
+const byline = (designerId, at) => {
+  const p = who(designerId);
+  return `<div class="by">${p.name}, ${firmOf(designerId).name}` +
+    ` &middot; <a href="${deepLink(p, at)}" target="_blank" rel="noopener">${stamp(at)}</a></div>`;
+};
+
+const quoteRow = (text, designerId, at) =>
+  `<div class="item"><p>${text}</p>${byline(designerId, at)}</div>`;
+
+const toolRow = (other, text, designerId, at) =>
+  `<div class="item item-tool">${toolTile(other, 'row-tile')}` +
+  `<div><p class="item-name">${other.name}</p><p>${text}</p>${byline(designerId, at)}</div></div>`;
+
+const pairRow = (subject, other, text, designerId, at) =>
+  `<div class="item item-pair"><div class="pair">` +
+  `<span class="row-tile">${markHTML(subject)}</span><span class="pair-name">${subject.name}</span>` +
+  `<span class="pair-sep">or</span>` +
+  `${toolTile(other, 'row-tile')}<span class="pair-name">${other.name}</span></div>` +
+  `<p>${text}</p>${byline(designerId, at)}</div>`;
+
+// Direction lives in the heading, which is pinned while you read the rows
+// under it. That is what lets both handoff buckets share one row shape.
+const section = (title, dir, rows) => {
+  if (!rows.length) return '';
+  const head = `<h3 class="micro">${title}${dir ? `<span class="dir">${dir}</span>` : ''}</h3>`;
+  if (rows.length <= SHOWN) return `<div class="sect">${head}${rows.join('')}</div>`;
+  return `<div class="sect">${head}${rows.slice(0, SHOWN).join('')}` +
+    `<div class="rest" hidden>${rows.slice(SHOWN).join('')}</div>` +
+    `<button class="more micro" type="button" aria-expanded="false">Show all</button></div>`;
+};
+
 function openPanel(n) {
   const uses = DATA.uses.filter((u) => u.toolId === n.id && inScope(u.designerId));
   const choices = DATA.choices.filter((c) => (c.a === n.id || c.b === n.id) && inScope(c.designerId));
@@ -592,45 +752,10 @@ function openPanel(n) {
   const outs = EDGES.filter((e) => e.from === n.id && rel(e));
   const ins = EDGES.filter((e) => e.to === n.id && rel(e));
 
-  const byline = (designerId, at) => {
-    const p = who(designerId);
-    return `<div class="by">${p.name}, ${firmOf(designerId).name}` +
-      ` &middot; <a href="${deepLink(p, at)}" target="_blank" rel="noopener">${stamp(at)}</a></div>`;
-  };
-
-  // Three silhouettes, one per kind of claim. A quote is testimony and carries
-  // no tile. A handoff is one tool, so it leads with that tool's mark. A choice
-  // is a pair, so it leads with both. You can tell them apart at scroll speed
-  // without reading the heading.
-  const quoteRow = (text, designerId, at) =>
-    `<div class="item"><p>${text}</p>${byline(designerId, at)}</div>`;
-
-  const toolRow = (other, text, designerId, at) =>
-    `<div class="item item-tool">${toolTile(other, 'row-tile')}` +
-    `<div><p class="item-name">${other.name}</p><p>${text}</p>${byline(designerId, at)}</div></div>`;
-
-  const pairRow = (other, text, designerId, at) =>
-    `<div class="item item-pair"><div class="pair">` +
-    `<span class="row-tile">${markHTML(n)}</span><span class="pair-name">${n.name}</span>` +
-    `<span class="pair-sep">or</span>` +
-    `${toolTile(other, 'row-tile')}<span class="pair-name">${other.name}</span></div>` +
-    `<p>${text}</p>${byline(designerId, at)}</div>`;
-
   const edgeRows = (list, key) => list.flatMap((e) =>
     e.by.filter((m) => inScope(m.designerId))
       .map((m) => toolRow(byId(NODES, e[key]), m.reason, m.designerId, m.at))
   );
-
-  // Direction lives in the heading, which is pinned while you read the rows
-  // under it. That is what lets both handoff buckets share one row shape.
-  const section = (title, dir, rows) => {
-    if (!rows.length) return '';
-    const head = `<h3 class="micro">${title}${dir ? `<span class="dir">${dir}</span>` : ''}</h3>`;
-    if (rows.length <= SHOWN) return `<div class="sect">${head}${rows.join('')}</div>`;
-    return `<div class="sect">${head}${rows.slice(0, SHOWN).join('')}` +
-      `<div class="rest" hidden>${rows.slice(SHOWN).join('')}</div>` +
-      `<button class="more micro" type="button" aria-expanded="false">Show all</button></div>`;
-  };
 
   const tiles = (list, cls) => list.length
     ? `<div class="flow-row">${list.map((m) => toolTile(m, cls)).join('')}</div>` : '';
@@ -658,18 +783,124 @@ function openPanel(n) {
   html += section('Leads to', '&rarr;', edgeRows(outs, 'to'));
   html += section('Versus', '', choices.map((c) => {
     const other = byId(NODES, c.a === n.id ? c.b : c.a);
-    return other ? pairRow(other, c.criterion, c.designerId, c.at) : '';
+    return other ? pairRow(n, other, c.criterion, c.designerId, c.at) : '';
   }).filter(Boolean));
 
   $('panelBody').innerHTML = html;
   $('panelBody').scrollTop = 0;
   $('panelBackdrop').hidden = false;
   $('panel').scrollTop = 0;
+  openTool = n.id; openFindingId = null;
+  writeURL();
 }
 
 function closePanel() {
   $('panelBackdrop').hidden = true;
   hideTip();
+  openTool = null; openFindingId = null;
+  writeURL();
+}
+
+/* ---------- findings ----------
+ * What the corpus shows, used as the way in rather than written up somewhere
+ * else. Every one is computed from the data, so they stay true as designers are
+ * added, and they stay corpus-wide even when the map is filtered: they are a
+ * claim about the whole set, not about whoever is selected.
+ *
+ * They are also where handoff[] and choices[] finally surface. Both were
+ * carrying the sharpest material in the project and neither was reachable. */
+
+const FINDINGS = [
+  { id: 'core', label: 'The shared core, and the long tail',
+    blurb: 'A handful of tools recur across the corpus. Everything else belongs to one person.' },
+  { id: 'handoff', label: 'How the work leaves the designer',
+    blurb: 'The artifact people hand over is disappearing.' },
+  { id: 'versus', label: 'Where designers disagree',
+    blurb: 'The same two tools, opposite conclusions.' },
+];
+
+function findingCore() {
+  // n.by is the distinct-designer set boot() already builds, and it is what
+  // sizes the nodes. Reusing it keeps the finding and the map counting the
+  // same thing, which a second implementation would eventually stop doing.
+  const half = DATA.designers.length / 2;
+  const sorted = [...NODES].sort((a, b) => b.by.length - a.by.length || a.name.localeCompare(b.name));
+  const core = sorted.filter((n) => n.by.length >= half);
+  const tail = sorted.filter((n) => n.by.length === 1);
+
+  // Named groups of tiles, no tallies. The shape of the split is the point,
+  // and it stays legible however the corpus grows.
+  const group = (list) => `<div class="grid-tiles">` + list.map((n) =>
+    `<span class="grid-cell">${toolTile(n, 'row-tile')}<span>${n.name}</span></span>`).join('') + `</div>`;
+
+  let html = `<div class="sect"><h3 class="micro">Reached for by most designers</h3>` +
+    (core.length ? group(core) : `<p class="empty">Nothing is shared that widely.</p>`) + `</div>`;
+  html += `<div class="sect"><h3 class="micro">Reached for by one designer only</h3>` +
+    (tail.length ? group(tail) : `<p class="empty">Every tool here is shared.</p>`) + `</div>`;
+  return html;
+}
+
+function findingHandoff() {
+  const rows = [...DATA.handoff]
+    .sort((a, b) => who(a.designerId).name.localeCompare(who(b.designerId).name))
+    .map((h) => quoteRow(h.claim, h.designerId, h.at));
+  return section('What they hand over', '', rows) ||
+    `<p class="empty">No handoff claims recorded yet.</p>`;
+}
+
+function findingVersus() {
+  // Group by tool pair, most-contested first: the pair the largest number of
+  // independent designers weighed in on is the actual finding.
+  const groups = new Map();
+  DATA.choices.forEach((c) => {
+    const key = [c.a, c.b].sort().join('|');
+    if (!groups.has(key)) groups.set(key, []);
+    groups.get(key).push(c);
+  });
+  const voices = (list) => new Set(list.map((c) => c.designerId)).size;
+  const ordered = [...groups.entries()].sort((x, y) => voices(y[1]) - voices(x[1]));
+
+  const rowsFor = (list) => list.map((c) => {
+    const subject = byId(NODES, c.a), other = byId(NODES, c.b);
+    return subject && other ? pairRow(subject, other, c.criterion, c.designerId, c.at) : '';
+  }).filter(Boolean);
+
+  // A pair several designers independently weighed in on is the finding. One
+  // pair mentioned once is an anecdote, so those collect under a single
+  // heading rather than each getting their own and fragmenting the panel.
+  let html = '';
+  const singles = [];
+  ordered.forEach(([key, list]) => {
+    const [aId, bId] = key.split('|');
+    const a = byId(NODES, aId), b = byId(NODES, bId);
+    if (!a || !b) return;
+    if (voices(list) > 1) html += section(`${a.name} or ${b.name}`, '', rowsFor(list));
+    else singles.push(...list);
+  });
+  html += section('Named once each', '', rowsFor(singles));
+  return html || `<p class="empty">No stated choices recorded yet.</p>`;
+}
+
+function openFinding(id) {
+  const f = FINDINGS.find((x) => x.id === id);
+  if (!f) return;
+  const body = id === 'core' ? findingCore()
+    : id === 'handoff' ? findingHandoff()
+    : findingVersus();
+
+  $('panelBody').innerHTML =
+    `<div class="panel-head"><div class="panel-id finding-id">` +
+    `<div><h2>${f.label}</h2><p class="kind micro">Across every interview</p></div></div>` +
+    `<p class="finding-blurb">${f.blurb}</p></div>` + body;
+  $('panelBody').scrollTop = 0;
+  $('panelBackdrop').hidden = false;
+  openFindingId = id; openTool = null;
+  writeURL();
+}
+
+function renderFindings() {
+  $('findings').innerHTML = FINDINGS.map((f) =>
+    `<button class="finding" type="button" data-finding="${f.id}">${f.label}</button>`).join('');
 }
 
 /* ---------- boot ---------- */
@@ -739,10 +970,54 @@ async function boot() {
       `<a href="${p.source.url}" target="_blank" rel="noopener">${p.name}</a>`
     ).join('<span class="sep">/</span>');
 
+  SEARCH = searchIndex();
+  renderFindings();
+  const { tool, finding } = readURL();
+
   draw();
+
+  // A shared link opens straight onto whatever it names, after the first paint
+  // so the panel lands over a drawn map rather than an empty one.
+  if (finding) openFinding(finding);
+  else if (tool) { const n = byId(NODES, tool); if (n) openPanel(n); }
+
   $('panelClose').addEventListener('click', closePanel);
   $('panelBackdrop').addEventListener('click', (e) => {
     if (e.target === $('panelBackdrop')) closePanel();
+  });
+
+  $('findings').addEventListener('click', (e) => {
+    const b = e.target.closest('[data-finding]');
+    if (b) openFinding(b.dataset.finding);
+  });
+
+  /* rail */
+  $('railPrev').addEventListener('click', () => pageRail(-1));
+  $('railNext').addEventListener('click', () => pageRail(1));
+  $('whoScroll').addEventListener('scroll', syncRail, { passive: true });
+
+  /* search */
+  const find = $('find');
+  find.addEventListener('input', () => runSearch(find.value));
+  find.addEventListener('focus', () => { if (find.value) runSearch(find.value); });
+  find.addEventListener('keydown', (e) => {
+    const hits = [...$('findResults').querySelectorAll('.find-hit')];
+    if (e.key === 'Enter') { e.preventDefault(); takeHit(hits.find((h) => h.getAttribute('aria-selected') === 'true') || hits[0]); return; }
+    if (e.key === 'Escape') { e.preventDefault(); closeSearch(true); find.blur(); return; }
+    if (e.key !== 'ArrowDown' && e.key !== 'ArrowUp') return;
+    e.preventDefault();
+    if (!hits.length) return;
+    const at = hits.findIndex((h) => h.getAttribute('aria-selected') === 'true');
+    const next = (at + (e.key === 'ArrowDown' ? 1 : -1) + hits.length) % hits.length;
+    hits.forEach((h, i) => h.setAttribute('aria-selected', String(i === next)));
+    hits[next].scrollIntoView({ block: 'nearest' });
+  });
+  $('findResults').addEventListener('mousedown', (e) => {
+    e.preventDefault();               // keep focus so blur does not race the click
+    takeHit(e.target.closest('.find-hit'));
+  });
+  document.addEventListener('click', (e) => {
+    if (!e.target.closest('.find')) closeSearch(false);
   });
 
   // Every tile in the panel is a way through the graph, so the panel browses
@@ -763,17 +1038,23 @@ async function boot() {
     more.textContent = open ? 'Show less' : 'Show all';
   });
 
-  // Global keyboard shortcut
+  // Cmd+K focuses search. It previously closed the panel, which meant a
+  // browser shortcut was swallowed to do something unrelated to searching.
   document.addEventListener('keydown', (e) => {
     if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
       e.preventDefault();
-      closePanel();
+      find.focus();
+      find.select();
+      return;
     }
-    if (e.key === 'Escape') { closePanel(); hideTip(); }
+    if (e.key === 'Escape' && document.activeElement !== find) { closePanel(); hideTip(); }
   });
 
   let t;
-  window.addEventListener('resize', () => { clearTimeout(t); t = setTimeout(draw, 180); });
+  window.addEventListener('resize', () => {
+    clearTimeout(t);
+    t = setTimeout(() => { draw(); syncRail(); }, 180);
+  });
 }
 
 boot();
