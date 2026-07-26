@@ -15,10 +15,10 @@
   --tile: #f2f0ec;
   --ink: #ededed;
   --ink-2: #9b9791;
-  --ink-3: #6a6763;
-  --line: rgba(237, 237, 237, 0.09);
-  --line-2: rgba(237, 237, 237, 0.18);
-  --edge: rgba(237, 237, 237, 0.30);
+  --ink-3: #78746f;
+  --line: rgba(237, 237, 237, 0.10);
+  --line-2: rgba(237, 237, 237, 0.20);
+  --edge: rgba(237, 237, 237, 0.38);
   --accent: #e14920;
   --font: 'Inter Tight', system-ui, -apple-system, sans-serif;
 }
@@ -99,23 +99,32 @@ html, body {
 /* ---------- canvas ---------- */
 
 .canvas-wrap { position: relative; flex: 1; min-height: 0; padding: 0 34px; }
+/* Radial lift: center slightly raised, edges deepen to true black, so the
+ * empty canvas reads as an intentional stage rather than a void. */
+.canvas-wrap::before {
+  content: '';
+  position: absolute; inset: 0;
+  pointer-events: none;
+  background: radial-gradient(120% 90% at 50% 42%, rgba(255,255,255,0.035) 0%, rgba(255,255,255,0) 46%, rgba(0,0,0,0.35) 100%);
+}
 #graph { width: 100%; height: 100%; display: block; }
 
 .edge { fill: none; stroke-linecap: round; transition: opacity .2s; }
 .edge-hit { fill: none; stroke: transparent; stroke-width: 16; cursor: pointer; }
 
 .band-label {
-  font-size: 10px;
-  font-weight: 500;
-  letter-spacing: 1.1px;
+  font-size: 11.5px;
+  font-weight: 600;
+  letter-spacing: 1.3px;
   text-transform: uppercase;
-  fill: var(--ink-3);
+  fill: var(--ink-2);
 }
 
 .node { cursor: grab; }
 .node.dragging { cursor: grabbing; }
 .tile, .node-mark, .node-label { transition: opacity .2s; }
-.tile { fill: var(--tile); }
+.tile { fill: var(--tile); transition: opacity .2s, transform .18s ease; transform-box: fill-box; transform-origin: center; }
+.node:hover .tile { transform: scale(1.05); }
 .node-label { fill: var(--ink-2); text-anchor: middle; pointer-events: none; }
 .node-count { fill: var(--ink-3); text-anchor: middle; pointer-events: none; font-size: 10px; }
 .node-mark { pointer-events: none; }
@@ -123,6 +132,19 @@ html, body {
 .node:focus { outline: none; }
 .node:focus-visible .tile { stroke: var(--accent); stroke-width: 2; }
 .node.on .tile { stroke: var(--accent); stroke-width: 2; }
+
+/* Hover storytelling: when one node is under focus, everything unrelated
+ * recedes so the eye follows the real handoffs instead of the spaghetti. */
+#graph.dimmed .node { opacity: 0.16; transition: opacity .22s; }
+#graph.dimmed .edge { opacity: 0.06 !important; transition: opacity .22s; }
+#graph.dimmed .node.lit { opacity: 1; }
+#graph.dimmed .edge.lit { opacity: 0.95 !important; }
+
+/* Entrance: nodes settle in, edges draw after. */
+@keyframes riseIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes edgeIn { from { opacity: 0; } to { opacity: 1; } }
+#graph.intro .node { animation: riseIn .5s cubic-bezier(.22,.61,.36,1) backwards; }
+#graph.intro .edge { animation: edgeIn .6s ease backwards; }
 
 .foot {
   flex: none;
