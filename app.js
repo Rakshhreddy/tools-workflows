@@ -246,7 +246,7 @@ function render(nodes) {
   const marker = (id, fill) => {
     const m = el('marker', {
       id, viewBox: '0 0 10 10', refX: '9', refY: '5',
-      markerWidth: '5', markerHeight: '5', orient: 'auto-start-reverse'
+      markerWidth: '7.5', markerHeight: '7.5', orient: 'auto-start-reverse'
     });
     m.appendChild(el('path', { d: 'M1,1.8 L9,5 L1,8.2 z', fill }));
     return m;
@@ -271,7 +271,7 @@ function render(nodes) {
     }));
     if (i) gBands.appendChild(el('line', {
       x1: st.x0, y1: 24, x2: st.x0, y2: H - 22,
-      stroke: 'var(--line)', 'stroke-width': '1'
+      stroke: 'var(--line-2)', 'stroke-width': '1'
     }));
     const lab = el('text', { class: 'band-label', x: st.x0 + 16, y: 34 });
     lab.textContent = `${i + 1} ${st.label}`;
@@ -297,7 +297,8 @@ function render(nodes) {
       stroke: on ? 'var(--accent)' : 'var(--edge)',
       'stroke-width': on ? '1.3' : (0.9 + mine.length * 0.28).toFixed(2),
       'stroke-dasharray': '2 5',
-      opacity: on ? '0.95' : '0.62',
+      // Rest quietly; hover-focus and company filters do the storytelling.
+      opacity: on ? '0.95' : '0.45',
       'marker-end': on ? 'url(#arw-on)' : 'url(#arw)'
     });
     const hit = el('path', { class: 'edge-hit', d: path });
