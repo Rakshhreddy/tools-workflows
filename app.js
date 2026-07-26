@@ -35,6 +35,11 @@ const firmOf = (designerId) => byId(DATA.companies, who(designerId).companyId);
 const staffOf = (companyId) => DATA.designers.filter((p) => p.companyId === companyId);
 const deepLink = (p, at) => `${p.source.url}&t=${at}s`;
 const firstName = (n) => n.split(' ')[0];
+const stageOf = (n) => STAGES.find((s) => s.id === n.stage);
+const stageLabel = (n) => (stageOf(n) || {}).label || '';
+const andList = (items) => items.length < 2
+  ? items.join('')
+  : `${items.slice(0, -1).join(', ')} and ${items[items.length - 1]}`;
 
 /** Everyone currently in scope: all, one company's people, or one person. */
 function scope() {
@@ -313,7 +318,7 @@ function render(nodes) {
 
   nodes.forEach((n, i) => {
     const g = el('g', { class: 'node', tabindex: '0', role: 'button', transform: `translate(${n.x},${n.y})` });
-    g.setAttribute('aria-label', `${n.name}, used by ${n.by.length} of ${DATA.designers.length} designers`);
+    g.setAttribute('aria-label', `${n.name}, ${stageLabel(n)} stage`);
     g.style.animationDelay = `${i * 22}ms`;
 
     g.appendChild(el('rect', {
@@ -484,7 +489,8 @@ function renderSummary() {
       const p = staff[0];
       el2.innerHTML = `<b>${c.name}</b><span class="role">, ${p.name}, ${p.role}.</span> ${p.thesis}`;
     } else {
-      el2.innerHTML = `<b>${c.name}</b><span class="role">, ${staff.length} designers.</span> Pick one to narrow the workflow.`;
+      const names = andList(staff.map((p) => p.name));
+      el2.innerHTML = `<b>${c.name}</b><span class="role">, ${names}.</span> Pick one to see their workflow.`;
     }
     return;
   }
@@ -493,28 +499,36 @@ function renderSummary() {
 
 /* ---------- tooltip ---------- */
 
+// Nothing is counted or ranked in the copy. This is one designer's workflow at
+// one company, not a popularity contest, so labels carry the stage and the
+// people rather than a tally. Size stays the only quantitative encoding.
+
 const tipRow = (text, designerId) =>
   `<span class="tip-row"><span class="dot"></span>${text} <i>${firstName(who(designerId).name)}, ${firmOf(designerId).name}</i></span>`;
 
 function tipNode(ev, n) {
   const uses = DATA.uses.filter((u) => u.toolId === n.id && inScope(u.designerId));
   const shown = uses.slice(0, 3).map((u) => tipRow(u.purpose, u.designerId)).join('');
-  const more = uses.length > 3 ? `<span class="tip-more micro">plus ${uses.length - 3} more</span>` : '';
-  const count = focused()
-    ? `${firmOf(scope()[0]).name}`
-    : `${n.by.length} of ${DATA.designers.length} designers`;
-  $('tip').innerHTML = `<b>${n.name}</b><span class="tip-count micro">${count}</span>${shown ||
-    '<span class="tip-row">Named as a step between other tools.</span>'}${more}`;
+  const more = uses.length > 3 ? `<span class="tip-more micro">Click to read the rest</span>` : '';
+  const kicker = focused()
+    ? `${stageLabel(n)} &middot; ${firmOf(scope()[0]).name}`
+    : stageLabel(n);
+  $('tip').innerHTML = `<b>${n.name}</b><span class="tip-count micro">${kicker}</span>${shown ||
+    '<span class="tip-row">Mentioned only as a step between other tools.</span>'}${more}`;
   $('tip').hidden = false;
   moveTip(ev);
 }
 
 function tipEdge(ev, e) {
-  const by = e.by.filter((m) => inScope(m.designerId));
-  const rows = by.map((m) => tipRow(m.reason, m.designerId)).join('');
+  const from = byId(NODES, e.from), to = byId(NODES, e.to);
+  const rows = e.by.filter((m) => inScope(m.designerId))
+    .map((m) => tipRow(m.reason, m.designerId)).join('');
+  const kicker = from.stage === to.stage
+    ? `Within ${stageLabel(from)}`
+    : `${stageLabel(from)} to ${stageLabel(to)}`;
   $('tip').innerHTML =
-    `<b>${byId(NODES, e.from).name} to ${byId(NODES, e.to).name}</b>` +
-    `<span class="tip-count micro">${by.length === 1 ? '1 designer' : `${by.length} designers`}</span>${rows}`;
+    `<b>${from.name} to ${to.name}</b>` +
+    `<span class="tip-count micro">${kicker}</span>${rows}`;
   $('tip').hidden = false;
   moveTip(ev);
 }
@@ -558,20 +572,21 @@ function openPanel(n) {
       .map((m) => row(`<b>${byId(NODES, dir === 'out' ? e.to : e.from).name}</b>: ${m.reason}`, m.designerId, m.at))
   ).join('');
 
-  const st = STAGES.find((s) => s.id === n.stage);
-  const scopeLabel = focused() ? firmOf(scope()[0]).name : `${n.by.length} of ${DATA.designers.length}`;
+  const kind = focused()
+    ? `${stageLabel(n)} &middot; ${firmOf(scope()[0]).name}`
+    : stageLabel(n);
   let html = `<div class="panel-head"><div class="panel-mark">${markHTML(n)}</div>` +
-    `<div><h2>${n.name}</h2><p class="kind micro">${st ? st.label : ''} &middot; ${scopeLabel}</p></div></div>`;
+    `<div><h2>${n.name}</h2><p class="kind micro">${kind}</p></div></div>`;
 
-  html += `<div class="sect"><h3 class="micro">What it is used for</h3>`;
+  html += `<div class="sect"><h3 class="micro">Used for</h3>`;
   html += uses.length ? uses.map((u) => row(u.purpose, u.designerId, u.at)).join('')
-    : `<p class="empty">Named as a step between other tools, with no direct use described.</p>`;
+    : `<p class="empty">Mentioned only as a step between other tools.</p>`;
   html += `</div>`;
 
   if (choices.length) {
-    html += `<div class="sect"><h3 class="micro">When to reach for it</h3>` + choices.map((c) => {
+    html += `<div class="sect"><h3 class="micro">Versus</h3>` + choices.map((c) => {
       const other = byId(NODES, c.a === n.id ? c.b : c.a);
-      return row(`<em>versus ${other ? other.name : ''}</em>: ${c.criterion}`, c.designerId, c.at);
+      return row(`<b>${other ? other.name : ''}</b>: ${c.criterion}`, c.designerId, c.at);
     }).join('') + `</div>`;
   }
   if (outs.length) html += `<div class="sect"><h3 class="micro">Leads to</h3>${edgeRows(outs, 'out')}</div>`;
@@ -643,9 +658,10 @@ async function boot() {
 
   await loadMarks(NODES.map((n) => n.id));
 
-  $('footNote').innerHTML = DATA.designers.map((p) =>
-    `<a href="${p.source.url}" target="_blank" rel="noopener">${p.name}</a>`
-  ).join('<span class="sep">/</span>');
+  $('footNote').innerHTML = `<span class="lead">From interviews with</span>` +
+    DATA.designers.map((p) =>
+      `<a href="${p.source.url}" target="_blank" rel="noopener">${p.name}</a>`
+    ).join('<span class="sep">/</span>');
 
   draw();
   $('panelClose').addEventListener('click', () => { $('panel').hidden = true; });

@@ -24,7 +24,7 @@ The stage axis is grounded in the sources, not invented. Danny Williams describe
 
 Three levels of depth:
 
-1. **Landscape.** Every tool, sized by how many designers use it, with dotted lines showing real handoffs.
+1. **Landscape.** Every tool, sized by how widely it is used, with dotted lines showing real handoffs.
 2. **Company.** Selecting a company narrows to its flow. Companies with more than one designer reveal nested chips.
 3. **Designer.** Narrows to one person. Hover overlays and the side panel scope to them.
 
@@ -37,7 +37,7 @@ Four rules. If a change cannot be justified by one of them, it does not ship.
 3. **Size is the only quantitative encoding.** No opacity ramps, no stroke width variation.
 4. **One line style.** Dotted, arrowhead for direction.
 
-Copy discipline: no legend explaining the encodings, and no em dashes anywhere.
+Copy discipline: no legend explaining the encodings, no counts or rankings in the interface, and no em dashes anywhere. Labels carry the stage and the people, because this is one designer's workflow at one company, not a popularity contest.
 
 ## Structure
 
@@ -104,4 +104,4 @@ All sources are [Sneak Peek](https://sneakpeek.design) interviews.
 
 ## A note on the sample
 
-These are designers who chose to record a workflow walkthrough, which is not a random sample of the profession. Counts are shown as raw numbers against a visible denominator for that reason. Nothing here is presented as a percentage of designers generally.
+These are designers who chose to record a workflow walkthrough, which is not a random sample of the profession. So nothing is counted or ranked in the interface. Tile size is a soft weight and nothing more, and every claim on screen is attributed to the person who said it, at the moment they said it.

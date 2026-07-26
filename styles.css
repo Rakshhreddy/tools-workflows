@@ -126,7 +126,6 @@ html, body {
 .tile { fill: var(--tile); transition: opacity .2s, transform .18s ease; transform-box: fill-box; transform-origin: center; }
 .node:hover .tile { transform: scale(1.05); }
 .node-label { fill: var(--ink-2); text-anchor: middle; pointer-events: none; }
-.node-count { fill: var(--ink-3); text-anchor: middle; pointer-events: none; font-size: 10px; }
 .node-mark { pointer-events: none; }
 .node-mono { font-weight: 700; text-anchor: middle; pointer-events: none; fill: #2a2a2a; }
 .node:focus { outline: none; }
@@ -162,6 +161,7 @@ html, body {
 .foot a { color: var(--ink-3); text-decoration: none; }
 .foot a:hover { color: var(--ink); }
 .foot .sep { margin: 0 9px; color: rgba(237, 237, 237, 0.16); }
+.foot .lead { margin-right: 11px; color: rgba(237, 237, 237, 0.26); }
 
 /* ---------- tooltip ---------- */
 
