@@ -1,8 +1,8 @@
 const SVGNS = 'http://www.w3.org/2000/svg';
 const XLINK = 'http://www.w3.org/1999/xlink';
 const FORMATS = ['svg', 'png', 'jpg', 'jpeg', 'webp', 'avif'];
-const TOP = 78;
-const BOT = 86;
+const TOP = 104;
+const BOT = 92;
 const PAD_X = 8;
 
 let DATA = null;
@@ -85,10 +85,40 @@ function computeLayout(nodes) {
   const clear = (n, lane, x) => !placed.some((p) =>
     p !== n && p.lane === lane && Math.abs(x - p.x) < n.r + p.r + 54);
 
+  // Filtered view (a company or one person). The corpus scatter is built for
+  // 24 tools; with only a handful it reads as lonely islands and long stray
+  // lines. So here we lay each stage out cleanly: horizontally centred in its
+  // band, evenly stacked and vertically centred as a group. Calm and ordered.
+  if (focused()) {
+    const cy = TOP + (H - TOP - BOT) / 2;
+    STAGES.forEach((st) => {
+      const list = nodes.filter((n) => n.stage === st.id)
+        .sort((a, b) => b.by.length - a.by.length);
+      if (!list.length) return;
+      const gap = Math.min(150, (H - TOP - BOT) / (list.length + 0.5));
+      const total = (list.length - 1) * gap;
+      list.forEach((n, i) => {
+        n.x = st.x;
+        n.y = cy - total / 2 + i * gap;
+        n.lane = i;
+      });
+    });
+    return;
+  }
+
   STAGES.forEach((st, si) => {
-    const list = nodes.filter((n) => n.stage === st.id)
+    const ranked = nodes.filter((n) => n.stage === st.id)
       .sort((a, b) => b.by.length - a.by.length);
 
+    // Interleave big-to-small outward from the centre so the largest tiles
+    // land mid-column (never jammed under the stage label) and each band uses
+    // its full height instead of stacking top-heavy.
+    const list = [];
+    ranked.forEach((n, k) => (k % 2 ? list.push(n) : list.unshift(n)));
+
+    // Spread each column across the full canvas height so no quadrant is
+    // starved. Nodes bias toward what they connect to, but the base
+    // distribution fills the frame evenly instead of clustering.
     list.forEach((n, i) => {
       const seed = si * 7 + i;
       n.x = st.x0 + st.w * (0.26 + jitter(seed) * 0.48);
@@ -96,9 +126,12 @@ function computeLayout(nodes) {
       const links = (adj.get(n.id) || [])
         .map((id) => byId(nodes, id))
         .filter((m) => m && m.lane !== undefined);
-      const target = links.length
+      // Even spread across lanes as the anchor, nudged toward connections.
+      const spread = list.length > 1 ? (i / (list.length - 1)) * (LANES - 1) : (LANES - 1) / 2;
+      const pull = links.length
         ? links.reduce((s, m) => s + m.lane, 0) / links.length
-        : (LANES - 1) * (0.2 + jitter(seed + 40) * 0.6);
+        : spread;
+      const target = spread * 0.72 + pull * 0.28;
 
       let best = 0, bestScore = Infinity;
       for (let lane = 0; lane < LANES; lane++) {
@@ -112,20 +145,52 @@ function computeLayout(nodes) {
   });
 
   // Anything still crowding a neighbour moves to open space, first sideways
-  // within its own band, then to an adjacent lane.
-  for (let pass = 0; pass < 4; pass++) {
+  // within its own band, then to an adjacent lane. Offsets are wide enough to
+  // clear the same-lane spacing threshold even for two large tiles.
+  for (let pass = 0; pass < 6; pass++) {
     placed.forEach((n) => {
       if (clear(n, n.lane, n.x)) return;
       const st = STAGES.find((s) => s.id === n.stage);
-      for (const dx of [34, -34, 68, -68]) {
+      for (const dx of [40, -40, 80, -80, 120, -120]) {
         const x = n.x + dx;
-        if (x > st.x0 + n.r + 10 && x < st.x0 + st.w - n.r - 10 && clear(n, n.lane, x)) { n.x = x; return; }
+        if (x > st.x0 + n.r + 8 && x < st.x0 + st.w - n.r - 8 && clear(n, n.lane, x)) { n.x = x; return; }
       }
       for (const lane of [n.lane - 1, n.lane + 1, n.lane - 2, n.lane + 2]) {
         if (lane < 0 || lane >= LANES) continue;
         if (clear(n, lane, n.x)) { n.lane = lane; n.y = laneY(lane); return; }
       }
     });
+  }
+
+  // Guaranteed no-overlap pass. The lane logic above is best-effort and can
+  // still leave two tiles touching (e.g. a crowded column). This does real
+  // geometric collision resolution: any overlapping pair is pushed apart until
+  // clear, so on the default screen no two logos ever sit on one another.
+  const GAP = 26; // breathing room between tiles, on top of their radii
+  for (let pass = 0; pass < 60; pass++) {
+    let moved = false;
+    for (let i = 0; i < placed.length; i++) {
+      for (let j = i + 1; j < placed.length; j++) {
+        const a = placed[i], b = placed[j];
+        let dx = b.x - a.x, dy = b.y - a.y;
+        const min = a.r + b.r + GAP;
+        let dist = Math.hypot(dx, dy);
+        if (dist >= min) continue;
+        if (dist < 0.01) { dx = 0; dy = (j % 2 ? 1 : -1); dist = 1; } // exact stack
+        const push = (min - dist) / 2;
+        const ux = dx / dist, uy = dy / dist;
+        a.x -= ux * push; a.y -= uy * push;
+        b.x += ux * push; b.y += uy * push;
+        moved = true;
+      }
+    }
+    // Keep everyone inside their stage band and the vertical canvas.
+    placed.forEach((n) => {
+      const st = STAGES.find((s) => s.id === n.stage);
+      n.x = Math.max(st.x0 + n.r + 8, Math.min(st.x0 + st.w - n.r - 8, n.x));
+      n.y = Math.max(TOP + n.r, Math.min(H - BOT - n.r, n.y));
+    });
+    if (!moved) break;
   }
 }
 
@@ -199,6 +264,11 @@ function render(nodes) {
 
   const gBands = el('g');
   STAGES.forEach((st, i) => {
+    // Faint alternating column fill so the five stages are felt as structure.
+    if (i % 2) gBands.appendChild(el('rect', {
+      x: st.x0, y: 20, width: st.w, height: H - 42,
+      fill: 'rgba(237, 237, 237, 0.026)'
+    }));
     if (i) gBands.appendChild(el('line', {
       x1: st.x0, y1: 24, x2: st.x0, y2: H - 22,
       stroke: 'var(--line)', 'stroke-width': '1'
@@ -235,13 +305,15 @@ function render(nodes) {
     hit.addEventListener('mousemove', moveTip);
     hit.addEventListener('mouseleave', hideTip);
     e.el = line; e.hit = hit;
+    line.style.animationDelay = `${260 + Math.random() * 340}ms`;
     gEdges.appendChild(line);
     gEdges.appendChild(hit);
   });
 
-  nodes.forEach((n) => {
+  nodes.forEach((n, i) => {
     const g = el('g', { class: 'node', tabindex: '0', role: 'button', transform: `translate(${n.x},${n.y})` });
     g.setAttribute('aria-label', `${n.name}, used by ${n.by.length} of ${DATA.designers.length} designers`);
+    g.style.animationDelay = `${i * 22}ms`;
 
     g.appendChild(el('rect', {
       class: 'tile', x: -n.r, y: -n.r, width: n.r * 2, height: n.r * 2,
@@ -254,15 +326,9 @@ function render(nodes) {
     label.textContent = n.name;
     g.appendChild(label);
 
-    if (!focused()) {
-      const c = el('text', { class: 'node-count', x: 0, y: n.r + 29 });
-      c.textContent = `${n.by.length}/${DATA.designers.length}`;
-      g.appendChild(c);
-    }
-
-    g.addEventListener('mouseenter', (ev) => { if (!n.dragging) tipNode(ev, n); });
+    g.addEventListener('mouseenter', (ev) => { if (!n.dragging) { tipNode(ev, n); focusNode(n); } });
     g.addEventListener('mousemove', (ev) => { if (!n.dragging) moveTip(ev); });
-    g.addEventListener('mouseleave', hideTip);
+    g.addEventListener('mouseleave', () => { hideTip(); clearFocus(); });
     g.addEventListener('keydown', (ev) => {
       if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); openPanel(n); }
     });
@@ -323,6 +389,28 @@ function attachDrag(g, n) {
   g.addEventListener('click', () => { if (!moved) openPanel(n); moved = false; });
 }
 
+/* ---------- hover focus ---------- */
+
+// Recede everything unrelated so the eye follows one tool's real handoffs.
+function focusNode(n) {
+  const related = new Set([n.id]);
+  EDGES.forEach((e) => {
+    if (!e.el) return;
+    if (e.from === n.id || e.to === n.id) {
+      e.el.classList.add('lit');
+      related.add(e.from); related.add(e.to);
+    }
+  });
+  NODES.forEach((m) => { if (m.el && related.has(m.id)) m.el.classList.add('lit'); });
+  svg.classList.add('dimmed');
+}
+
+function clearFocus() {
+  svg.classList.remove('dimmed');
+  NODES.forEach((m) => m.el && m.el.classList.remove('lit'));
+  EDGES.forEach((e) => e.el && e.el.classList.remove('lit'));
+}
+
 /* ---------- state ---------- */
 
 function draw() {
@@ -337,6 +425,15 @@ function draw() {
   render(nodes);
   renderRails();
   renderSummary();
+
+  // Play the entrance once, on first paint only.
+  if (!draw.booted) {
+    draw.booted = true;
+    if (!matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      svg.classList.add('intro');
+      setTimeout(() => svg.classList.remove('intro'), 1300);
+    }
+  }
 }
 
 function renderRails() {
