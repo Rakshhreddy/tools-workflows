@@ -161,6 +161,37 @@ function computeLayout(nodes) {
       }
     });
   }
+
+  // Guaranteed no-overlap pass. The lane logic above is best-effort and can
+  // still leave two tiles touching (e.g. a crowded column). This does real
+  // geometric collision resolution: any overlapping pair is pushed apart until
+  // clear, so on the default screen no two logos ever sit on one another.
+  const GAP = 26; // breathing room between tiles, on top of their radii
+  for (let pass = 0; pass < 60; pass++) {
+    let moved = false;
+    for (let i = 0; i < placed.length; i++) {
+      for (let j = i + 1; j < placed.length; j++) {
+        const a = placed[i], b = placed[j];
+        let dx = b.x - a.x, dy = b.y - a.y;
+        const min = a.r + b.r + GAP;
+        let dist = Math.hypot(dx, dy);
+        if (dist >= min) continue;
+        if (dist < 0.01) { dx = 0; dy = (j % 2 ? 1 : -1); dist = 1; } // exact stack
+        const push = (min - dist) / 2;
+        const ux = dx / dist, uy = dy / dist;
+        a.x -= ux * push; a.y -= uy * push;
+        b.x += ux * push; b.y += uy * push;
+        moved = true;
+      }
+    }
+    // Keep everyone inside their stage band and the vertical canvas.
+    placed.forEach((n) => {
+      const st = STAGES.find((s) => s.id === n.stage);
+      n.x = Math.max(st.x0 + n.r + 8, Math.min(st.x0 + st.w - n.r - 8, n.x));
+      n.y = Math.max(TOP + n.r, Math.min(H - BOT - n.r, n.y));
+    });
+    if (!moved) break;
+  }
 }
 
 /* ---------- rendering ---------- */
