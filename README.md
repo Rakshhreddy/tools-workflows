@@ -39,6 +39,8 @@ Four rules. If a change cannot be justified by one of them, it does not ship.
 
 Copy discipline: no legend explaining the encodings, no counts or rankings in the interface, and no em dashes anywhere. Labels carry the stage and the people, because this is one designer's workflow at one company, not a popularity contest.
 
+The side panel invents no chrome of its own. It reuses the canvas vocabulary, so each kind of claim has a shape you can read at scroll speed: the header is a vertical slice of the graph, a quote carries no tile, a handoff leads with the other tool's mark, and a choice leads with both.
+
 ## Structure
 
 ```
