@@ -246,7 +246,7 @@ function render(nodes) {
   const marker = (id, fill) => {
     const m = el('marker', {
       id, viewBox: '0 0 10 10', refX: '9', refY: '5',
-      markerWidth: '5', markerHeight: '5', orient: 'auto-start-reverse'
+      markerWidth: '7.5', markerHeight: '7.5', orient: 'auto-start-reverse'
     });
     m.appendChild(el('path', { d: 'M1,1.8 L9,5 L1,8.2 z', fill }));
     return m;
@@ -297,7 +297,8 @@ function render(nodes) {
       stroke: on ? 'var(--accent)' : 'var(--edge)',
       'stroke-width': on ? '1.3' : (0.9 + mine.length * 0.28).toFixed(2),
       'stroke-dasharray': '2 5',
-      opacity: on ? '0.95' : '0.62',
+      // Rest quietly; hover-focus and company filters do the storytelling.
+      opacity: on ? '0.95' : '0.45',
       'marker-end': on ? 'url(#arw-on)' : 'url(#arw)'
     });
     const hit = el('path', { class: 'edge-hit', d: path });
@@ -415,8 +416,12 @@ function clearFocus() {
 
 function draw() {
   const box = $('canvasWrap').getBoundingClientRect();
-  W = Math.max(940, Math.round(box.width));
-  H = Math.max(420, Math.round(box.height));
+  // Scale the coordinate space up relative to the real container so the fixed
+  // size tiles render smaller with more breathing room, matching the calmer,
+  // zoomed out feel of viewing the page at ~80% browser zoom, by default.
+  const ZOOM_OUT = 1.25;
+  W = Math.max(940, Math.round(box.width * ZOOM_OUT));
+  H = Math.max(420, Math.round(box.height * ZOOM_OUT));
 
   const live = focused() ? toolsInScope() : null;
   const nodes = live ? NODES.filter((n) => live.has(n.id)) : NODES;
