@@ -19,9 +19,17 @@
         <div class="who" id="who"></div>
         <div class="who-sub" id="whoSub"></div>
       </div>
-      <button class="palette-trigger micro" id="paletteTrigger" aria-label="Search tools, designers, companies">Cmd+K</button>
     </div>
-    <p class="mode" id="mode"></p>
+    <div class="head-bottom">
+      <div class="stage-dots" aria-hidden="true">
+        <span class="stage-dot" style="--i:0"></span>
+        <span class="stage-dot" style="--i:1"></span>
+        <span class="stage-dot" style="--i:2"></span>
+        <span class="stage-dot" style="--i:3"></span>
+        <span class="stage-dot" style="--i:4"></span>
+      </div>
+      <p class="mode" id="mode"></p>
+    </div>
   </header>
 
   <main class="canvas-wrap" id="canvasWrap">
@@ -34,26 +42,14 @@
   <footer class="foot" id="footNote"></footer>
 </div>
 
-<div class="palette-overlay" id="paletteOverlay" hidden>
-  <div class="palette" role="dialog" aria-label="Quick navigation">
-    <div class="palette-input-wrap">
-      <svg class="palette-search-icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-      <input class="palette-input" id="paletteInput" type="text" placeholder="Search tools, designers, companies..." autocomplete="off" spellcheck="false">
-      <kbd class="palette-esc">ESC</kbd>
-    </div>
-    <div class="palette-results" id="paletteResults" role="listbox"></div>
-    <div class="palette-footer micro">
-      <span><span class="key">↑↓</span> Navigate</span>
-      <span><span class="key">Enter</span> Select</span>
-      <span><span class="key">Esc</span> Close</span>
-    </div>
-  </div>
+<div class="panel-backdrop" id="panelBackdrop" hidden>
+  <aside class="panel" id="panel" role="dialog" aria-label="Tool detail">
+    <button class="panel-close" id="panelClose" aria-label="Close">
+      <svg viewBox="0 0 24 24" fill="none"><line x1="6" y1="6" x2="18" y2="18"/><line x1="18" y1="6" x2="6" y2="18"/></svg>
+    </button>
+    <div class="panel-inner" id="panelBody"></div>
+  </aside>
 </div>
-
-<aside class="panel" id="panel" hidden>
-  <button class="panel-close" id="panelClose" aria-label="Close">&times;</button>
-  <div id="panelBody"></div>
-</aside>
 
 <script src="app.js"></script>
 </body>

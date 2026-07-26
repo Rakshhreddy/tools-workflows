@@ -482,6 +482,7 @@ function renderSummary() {
   if (person) {
     const p = who(person);
     el2.innerHTML = `<b>${p.name}</b><span class="role">, ${p.role} at ${firmOf(person).name}.</span> ${p.thesis}`;
+    el2.classList.add('has-content');
     return;
   }
   if (company) {
@@ -494,9 +495,11 @@ function renderSummary() {
       const names = andList(staff.map((p) => p.name));
       el2.innerHTML = `<b>${c.name}</b><span class="role">, ${names}.</span> Pick one to see their workflow.`;
     }
+    el2.classList.add('has-content');
     return;
   }
   el2.innerHTML = '';
+  el2.classList.remove('has-content');
 }
 
 /* ---------- tooltip ---------- */
@@ -659,148 +662,14 @@ function openPanel(n) {
   }).filter(Boolean));
 
   $('panelBody').innerHTML = html;
+  $('panelBody').scrollTop = 0;
+  $('panelBackdrop').hidden = false;
   $('panel').scrollTop = 0;
-  $('panel').hidden = false;
 }
 
-/* ---------- command palette ---------- */
-
-const PALETTE_ITEMS = [];
-let paletteOpen = false;
-let paletteIdx = -1;
-
-function buildPaletteIndex() {
-  PALETTE_ITEMS.length = 0;
-  DATA.tools.forEach((t) => {
-    const st = stageOf(t);
-    PALETTE_ITEMS.push({
-      id: t.id, type: 'tool', name: t.name,
-      desc: st ? st.label : '', kind: t.kind,
-      icon: MARKS[t.id], mono: monogram(t.name)
-    });
-  });
-  DATA.designers.forEach((p) => {
-    const firm = firmOf(p.id);
-    PALETTE_ITEMS.push({
-      id: p.id, type: 'designer', name: p.name,
-      desc: `${p.role} at ${firm.name}`, firmId: firm.id,
-      thesis: p.thesis
-    });
-  });
-  DATA.companies.forEach((c) => {
-    const staff = staffOf(c.id);
-    PALETTE_ITEMS.push({
-      id: c.id, type: 'company', name: c.name,
-      desc: staff.length > 0
-        ? `${staff.length} designer${staff.length > 1 ? 's' : ''}: ${staff.map((p) => p.name).join(', ')}`
-        : ''
-    });
-  });
-}
-
-function openPalette() {
-  paletteOpen = true;
-  paletteIdx = -1;
-  const overlay = $('paletteOverlay');
-  overlay.hidden = false;
-  const input = $('paletteInput');
-  input.value = '';
-  input.focus();
-  filterPalette('');
-}
-
-function closePalette() {
-  paletteOpen = false;
-  $('paletteOverlay').hidden = true;
-  $('paletteResults').innerHTML = '';
-}
-
-function filterPalette(query) {
-  const q = query.toLowerCase().trim();
-  const results = q
-    ? PALETTE_ITEMS.filter((item) =>
-        item.name.toLowerCase().includes(q) ||
-        item.desc.toLowerCase().includes(q)
-      )
-    : PALETTE_ITEMS;
-
-  const container = $('paletteResults');
-  if (!results.length) {
-    container.innerHTML = '<div class="palette-empty">No results found</div>';
-    return;
-  }
-
-  container.innerHTML = results.map((item, i) => {
-    const isTool = item.type === 'tool';
-    const isDes = item.type === 'designer';
-    const iconHtml = item.icon
-      ? (item.icon.type === 'img'
-          ? `<img src="${item.icon.src}" alt="">`
-          : `<svg viewBox="${item.icon.viewBox}">${item.icon.inner}</svg>`)
-      : item.mono || '';
-    return `<div class="palette-item" data-type="${item.type}" data-id="${item.id}" data-firm="${item.firmId || ''}" role="option" data-index="${i}">
-      <div class="palette-item-icon ${item.type}">${iconHtml}</div>
-      <div class="palette-item-info">
-        <div class="palette-item-name">${highlightMatch(item.name, q)}</div>
-        <div class="palette-item-desc">${highlightMatch(item.desc, q)}</div>
-      </div>
-      <span class="palette-item-badge ${item.type}">${item.type}</span>
-    </div>`;
-  }).join('');
-
-  paletteIdx = -1;
-}
-
-function highlightMatch(text, query) {
-  if (!query) return text;
-  const idx = text.toLowerCase().indexOf(query);
-  if (idx === -1) return text;
-  return text.slice(0, idx) + '<mark>' + text.slice(idx, idx + query.length) + '</mark>' + text.slice(idx + query.length);
-}
-
-function selectPaletteItem() {
-  const items = $('paletteResults').querySelectorAll('.palette-item');
-  if (!items.length) return;
-  const idx = paletteIdx < 0 ? 0 : paletteIdx;
-  if (idx >= items.length) return;
-  const item = items[idx];
-  activatePaletteItem(item.dataset.type, item.dataset.id, item.dataset.firm);
-}
-
-function activatePaletteItem(type, id, firmId) {
-  closePalette();
-  if (type === 'tool') {
-    const node = byId(NODES, id);
-    if (node) {
-      company = null; person = null;
-      draw();
-      openPanel(node);
-      setTimeout(() => {
-        const el = node.el;
-        if (el) {
-          el.focus();
-          el.classList.add('on');
-          setTimeout(() => el.classList.remove('on'), 2000);
-        }
-      }, 100);
-    }
-  } else if (type === 'designer') {
-    person = id;
-    company = firmId;
-    draw();
-  } else if (type === 'company') {
-    company = id;
-    person = null;
-    draw();
-  }
-}
-
-function navigatePalette(dir) {
-  const items = $('paletteResults').querySelectorAll('.palette-item');
-  if (!items.length) return;
-  paletteIdx = (paletteIdx + dir + items.length) % items.length;
-  items.forEach((el, i) => el.classList.toggle('highlighted', i === paletteIdx));
-  items[paletteIdx].scrollIntoView({ block: 'nearest' });
+function closePanel() {
+  $('panelBackdrop').hidden = true;
+  hideTip();
 }
 
 /* ---------- boot ---------- */
@@ -871,7 +740,10 @@ async function boot() {
     ).join('<span class="sep">/</span>');
 
   draw();
-  $('panelClose').addEventListener('click', () => { $('panel').hidden = true; });
+  $('panelClose').addEventListener('click', closePanel);
+  $('panelBackdrop').addEventListener('click', (e) => {
+    if (e.target === $('panelBackdrop')) closePanel();
+  });
 
   // Every tile in the panel is a way through the graph, so the panel browses
   // like the canvas does.
@@ -891,43 +763,13 @@ async function boot() {
     more.textContent = open ? 'Show less' : 'Show all';
   });
 
-  buildPaletteIndex();
-
-  // Palette trigger
-  $('paletteTrigger').addEventListener('click', openPalette);
-
   // Global keyboard shortcut
   document.addEventListener('keydown', (e) => {
     if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
       e.preventDefault();
-      if ($('panel').hidden === false) { $('panel').hidden = true; }
-      paletteOpen ? closePalette() : openPalette();
-      return;
+      closePanel();
     }
-    if (e.key === 'Escape') { $('panel').hidden = true; hideTip(); closePalette(); }
-  });
-
-  // Palette input
-  $('paletteInput').addEventListener('input', (e) => {
-    filterPalette(e.target.value);
-    paletteIdx = -1;
-  });
-
-  $('paletteInput').addEventListener('keydown', (e) => {
-    if (e.key === 'ArrowDown') { e.preventDefault(); navigatePalette(1); }
-    else if (e.key === 'ArrowUp') { e.preventDefault(); navigatePalette(-1); }
-    else if (e.key === 'Enter') { e.preventDefault(); selectPaletteItem(); }
-  });
-
-  // Palette result clicks
-  $('paletteResults').addEventListener('click', (e) => {
-    const item = e.target.closest('.palette-item');
-    if (item) activatePaletteItem(item.dataset.type, item.dataset.id, item.dataset.firm);
-  });
-
-  // Close on overlay click
-  $('paletteOverlay').addEventListener('click', (e) => {
-    if (e.target === $('paletteOverlay')) closePalette();
+    if (e.key === 'Escape') { closePanel(); hideTip(); }
   });
 
   let t;
