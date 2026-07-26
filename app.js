@@ -415,8 +415,12 @@ function clearFocus() {
 
 function draw() {
   const box = $('canvasWrap').getBoundingClientRect();
-  W = Math.max(940, Math.round(box.width));
-  H = Math.max(420, Math.round(box.height));
+  // Scale the coordinate space up relative to the real container so the fixed
+  // size tiles render smaller with more breathing room, matching the calmer,
+  // zoomed out feel of viewing the page at ~80% browser zoom, by default.
+  const ZOOM_OUT = 1.25;
+  W = Math.max(940, Math.round(box.width * ZOOM_OUT));
+  H = Math.max(420, Math.round(box.height * ZOOM_OUT));
 
   const live = focused() ? toolsInScope() : null;
   const nodes = live ? NODES.filter((n) => live.has(n.id)) : NODES;
