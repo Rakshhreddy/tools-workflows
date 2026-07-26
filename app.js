@@ -278,8 +278,10 @@ function render(nodes) {
       x1: st.x0, y1: 24, x2: st.x0, y2: H - 22,
       stroke: 'var(--line)', 'stroke-width': '1'
     }));
+    // No number on the label. These are phases, not steps, and people enter
+    // wherever the work starts. Left to right already carries the flow.
     const lab = el('text', { class: 'band-label', x: st.x0 + 16, y: 34 });
-    lab.textContent = `${i + 1} ${st.label}`;
+    lab.textContent = st.label;
     gBands.appendChild(lab);
   });
   svg.appendChild(gBands);
@@ -632,10 +634,9 @@ function openPanel(n) {
 
   // The header is a vertical slice of the graph: what feeds in, this tool,
   // where it goes. Answers "where does this sit" before a word is read.
-  const stageNo = STAGES.findIndex((s) => s.id === n.stage) + 1;
   const kind = focused()
-    ? `${stageNo} ${stageLabel(n)} &middot; ${firmOf(scope()[0]).name}`
-    : `${stageNo} ${stageLabel(n)}`;
+    ? `${stageLabel(n)} &middot; ${firmOf(scope()[0]).name}`
+    : stageLabel(n);
   const feeds = neighbours(ins, 'from');
   const leads = neighbours(outs, 'to');
 

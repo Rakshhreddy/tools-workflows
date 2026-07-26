@@ -10,17 +10,19 @@ python3 -m http.server 8932
 
 ## What it shows
 
-Tools are grouped into the five stages every designer in the corpus moves through:
+Tools are grouped into the phases every designer in the corpus moves through:
 
-| Stage | Meaning |
+| Phase | Meaning |
 |---|---|
-| 1 Gather | Signal in: inspiration, customer voice, what was said in the room |
-| 2 Frame | Turning raw signal into something you can act on |
-| 3 Explore | Going wide and rough, nothing precious |
-| 4 Build | Making it real in code, against the real design system |
-| 5 Ship | Out to engineers, stakeholders and production |
+| Gather | Signal in: inspiration, customer voice, what was said in the room |
+| Frame | Turning raw signal into something you can act on |
+| Explore | Going wide and rough, nothing precious |
+| Build | Making it real in code, against the real design system |
+| Ship | Out to engineers, stakeholders and production |
 
-The stage axis is grounded in the sources, not invented. Danny Williams describes the explore to refine spine himself at 10:52, and Kazden Cattapan describes diverging then converging at 10:42.
+They are not numbered anywhere in the interface. Numbering would assert an order the sources do not claim: people enter wherever the work starts, and movement runs both ways. Left to right carries the flow on its own.
+
+The axis is grounded in the sources, not invented. Danny Williams describes the explore to refine spine himself at 10:52, and Kazden Cattapan describes diverging then converging at 10:42.
 
 Three levels of depth:
 
