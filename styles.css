@@ -89,12 +89,19 @@ html, body {
 .stage-dot:nth-child(4) { background: rgba(237, 237, 237, 0.28); }
 .stage-dot:nth-child(5) { background: rgba(237, 237, 237, 0.38); }
 
+/* Fixed at two lines, always, empty or not. If this grows when a company is
+ * picked the header gets taller, the canvas gets shorter, and the whole graph
+ * relayouts under the cursor. Reserving the space is what stops the jump. */
 .mode {
   flex: 1;
   font-size: 12.5px;
   line-height: 1.5;
   color: var(--ink-2);
-  min-height: 18px;
+  height: 38px;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 .mode b { color: var(--ink); font-weight: 600; }
 .mode .role { color: var(--ink-3); }
@@ -103,7 +110,12 @@ html, body {
  * width rather than wrapping the header onto a second line. min-width:0 is what
  * lets a flex child actually shrink, and it is what makes the scroller engage. */
 .rails { display: flex; flex-direction: column; align-items: flex-end; gap: 8px; flex: 1 1 300px; min-width: 0; }
-.who-sub { display: flex; gap: 6px; flex-wrap: wrap; justify-content: flex-end; }
+/* Height reserved whether or not a company has designers to show, for the same
+ * reason: revealing these must not push the canvas down. */
+.who-sub {
+  display: flex; gap: 6px; flex-wrap: nowrap; justify-content: flex-end;
+  min-height: 24px;
+}
 
 /* ---------- company rail ----------
  * Scrolls rather than wraps, so the header keeps its shape however many
