@@ -71,20 +71,19 @@ html, body {
 .title { font-weight: 600; letter-spacing: -0.015em; color: var(--ink); }
 .sub { color: var(--ink-2); }
 
-/* Fixed at two lines, always, empty or not. If this grows when a company is
- * picked the header gets taller, the canvas gets shorter, and the whole graph
- * relayouts under the cursor. Reserving the space is what stops the jump. */
-/* flex:none matters. As a column flex item, flex-basis wins over height on the
- * main axis, so `flex: 1` silently collapsed this to zero and took the clamp
- * with it. Two lines of space, reserved whether it is filled or not. */
+/* Exactly one line, in every state, filled or empty. Two lines meant the block
+ * changed shape between companies. flex:none matters: as a column flex item,
+ * flex-basis beats height on the main axis, so `flex: 1` collapses this to nil. */
 .mode {
   flex: none;
-  height: 38px;
-  overflow: hidden;
-  font-size: 12.5px;
-  line-height: 1.5;
-  color: var(--ink-2);
   margin: 0;
+  height: 20px;
+  line-height: 20px;
+  font-size: 13px;
+  color: var(--ink-2);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 .mode b { color: var(--ink); font-weight: 600; }
 .mode .role { color: var(--ink-3); }
@@ -92,7 +91,7 @@ html, body {
 /* The rail takes the space the lede does not, and shrinks below its content
  * width rather than wrapping the header onto a second line. min-width:0 is what
  * lets a flex child actually shrink, and it is what makes the scroller engage. */
-.rails { display: flex; flex-direction: column; align-items: flex-end; gap: 8px; flex: 1 1 300px; min-width: 0; }
+.rails { display: flex; flex-direction: column; align-items: flex-end; gap: 10px; flex: 1 1 300px; min-width: 0; }
 /* Height reserved whether or not a company has designers to show, for the same
  * reason: revealing these must not push the canvas down. */
 .who-sub {
@@ -141,58 +140,6 @@ html, body {
 .rail-arrow[hidden] { display: none; }
 .rail-arrow:hover { border-color: var(--line-2); color: var(--ink); }
 .rail-arrow svg { width: 13px; height: 13px; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
-
-/* ---------- search ---------- */
-
-.find { position: relative; }
-.find-input {
-  width: 232px;
-  padding: 6px 40px 6px 12px;
-  border: 0.5px solid var(--line);
-  border-radius: 100px;
-  background: transparent;
-  font: inherit;
-  font-size: 12.5px;
-  color: var(--ink);
-  transition: border-color .2s, width .2s;
-}
-.find-input::placeholder { color: var(--ink-3); }
-.find-input:focus { outline: none; border-color: var(--line-2); width: 268px; }
-.find-input::-webkit-search-cancel-button { display: none; }
-
-.find-key {
-  position: absolute; top: 50%; right: 11px;
-  transform: translateY(-50%);
-  pointer-events: none;
-  font-family: inherit; font-size: 10px;
-  color: var(--ink-3);
-  letter-spacing: 0.5px;
-}
-.find-input:focus + .find-key { opacity: 0; }
-
-.find-results {
-  position: absolute; z-index: 30;
-  top: calc(100% + 6px); right: 0;
-  width: 268px;
-  padding: 5px;
-  background: var(--surface);
-  border: 0.5px solid var(--line-2);
-  border-radius: 11px;
-  box-shadow: 0 16px 44px rgba(0, 0, 0, .55);
-  max-height: 300px; overflow-y: auto;
-}
-.find-hit {
-  display: block; width: 100%;
-  padding: 7px 9px;
-  border: 0; border-radius: 7px;
-  background: none;
-  font: inherit; font-size: 12.5px;
-  color: var(--ink);
-  text-align: left; cursor: pointer;
-}
-.find-hit[aria-selected="true"], .find-hit:hover { background: var(--surface-2); }
-.find-hint { display: block; font-size: 11px; color: var(--ink-3); margin-top: 1px; }
-.find-empty { margin: 0; padding: 8px 9px; font-size: 12.5px; color: var(--ink-3); }
 
 /* ---------- findings ----------
  * What the corpus shows, as the way in. Quiet by default, because the map is
