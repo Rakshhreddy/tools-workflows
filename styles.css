@@ -57,7 +57,7 @@ html, body {
   flex-wrap: wrap;
 }
 
-.lede { margin: 0; max-width: 52ch; line-height: 1.55; font-size: 14.5px; }
+.lede { margin: 0; flex: 0 1 auto; max-width: 52ch; line-height: 1.55; font-size: 14.5px; }
 .title { font-weight: 600; letter-spacing: -0.015em; color: var(--ink); }
 .sub { color: var(--ink-2); }
 
@@ -99,8 +99,144 @@ html, body {
 .mode b { color: var(--ink); font-weight: 600; }
 .mode .role { color: var(--ink-3); }
 
-.rails { display: flex; flex-direction: column; align-items: flex-end; gap: 8px; }
-.who, .who-sub { display: flex; gap: 6px; flex-wrap: wrap; justify-content: flex-end; }
+/* The rail takes the space the lede does not, and shrinks below its content
+ * width rather than wrapping the header onto a second line. min-width:0 is what
+ * lets a flex child actually shrink, and it is what makes the scroller engage. */
+.rails { display: flex; flex-direction: column; align-items: flex-end; gap: 8px; flex: 1 1 300px; min-width: 0; }
+.who-sub { display: flex; gap: 6px; flex-wrap: wrap; justify-content: flex-end; }
+
+/* ---------- company rail ----------
+ * Scrolls rather than wraps, so the header keeps its shape however many
+ * companies the corpus grows to. Arrows and fades only appear once something
+ * is genuinely out of view, so nothing changes until it needs to. */
+
+.who-rail { display: flex; align-items: center; gap: 4px; max-width: 100%; min-width: 0; }
+
+.who-scroll {
+  overflow-x: auto;
+  scrollbar-width: none;
+  scroll-behavior: smooth;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+.who-scroll::-webkit-scrollbar { display: none; }
+.who { display: flex; gap: 6px; width: max-content; }
+
+/* Fade the edge that still has content behind it. mask-image rather than a
+ * gradient overlay, so it works over the page background whatever that is. */
+.who-scroll.fade-r { mask-image: linear-gradient(to right, #000 82%, transparent 100%); }
+.who-scroll.fade-l { mask-image: linear-gradient(to left, #000 82%, transparent 100%); }
+.who-scroll.fade-l.fade-r {
+  mask-image: linear-gradient(to right, transparent 0%, #000 12%, #000 88%, transparent 100%);
+}
+
+.rail-arrow {
+  flex: none;
+  width: 24px; height: 24px; padding: 0;
+  display: flex; align-items: center; justify-content: center;
+  border: 0.5px solid var(--line);
+  border-radius: 50%;
+  background: var(--surface);
+  color: var(--ink-2);
+  cursor: pointer;
+  transition: border-color .2s, color .2s;
+}
+/* display:flex above would otherwise beat the UA's [hidden] rule and leave the
+ * arrows on screen when there is nothing to scroll to. */
+.rail-arrow[hidden] { display: none; }
+.rail-arrow:hover { border-color: var(--line-2); color: var(--ink); }
+.rail-arrow svg { width: 13px; height: 13px; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+
+/* ---------- search ---------- */
+
+.find { position: relative; }
+.find-input {
+  width: 232px;
+  padding: 6px 40px 6px 12px;
+  border: 0.5px solid var(--line);
+  border-radius: 100px;
+  background: transparent;
+  font: inherit;
+  font-size: 12.5px;
+  color: var(--ink);
+  transition: border-color .2s, width .2s;
+}
+.find-input::placeholder { color: var(--ink-3); }
+.find-input:focus { outline: none; border-color: var(--line-2); width: 268px; }
+.find-input::-webkit-search-cancel-button { display: none; }
+
+.find-key {
+  position: absolute; top: 50%; right: 11px;
+  transform: translateY(-50%);
+  pointer-events: none;
+  font-family: inherit; font-size: 10px;
+  color: var(--ink-3);
+  letter-spacing: 0.5px;
+}
+.find-input:focus + .find-key { opacity: 0; }
+
+.find-results {
+  position: absolute; z-index: 30;
+  top: calc(100% + 6px); right: 0;
+  width: 268px;
+  padding: 5px;
+  background: var(--surface);
+  border: 0.5px solid var(--line-2);
+  border-radius: 11px;
+  box-shadow: 0 16px 44px rgba(0, 0, 0, .55);
+  max-height: 300px; overflow-y: auto;
+}
+.find-hit {
+  display: block; width: 100%;
+  padding: 7px 9px;
+  border: 0; border-radius: 7px;
+  background: none;
+  font: inherit; font-size: 12.5px;
+  color: var(--ink);
+  text-align: left; cursor: pointer;
+}
+.find-hit[aria-selected="true"], .find-hit:hover { background: var(--surface-2); }
+.find-hint { display: block; font-size: 11px; color: var(--ink-3); margin-top: 1px; }
+.find-empty { margin: 0; padding: 8px 9px; font-size: 12.5px; color: var(--ink-3); }
+
+/* ---------- findings ----------
+ * What the corpus shows, as the way in. Quiet by default, because the map is
+ * still the thing; they read as a line of claims, not as buttons. */
+
+.findings { display: flex; align-items: center; gap: 0 20px; min-width: 0; flex-wrap: wrap; }
+.finding {
+  border: 0; padding: 0; background: none;
+  font-family: inherit; font-size: 11.5px;
+  color: var(--ink-3);
+  cursor: pointer;
+  white-space: nowrap;
+  border-bottom: 1px solid transparent;
+  transition: color .2s, border-color .2s;
+}
+.finding:hover { color: var(--ink); border-bottom-color: var(--line-2); }
+
+.finding-id { align-items: flex-start; }
+.finding-blurb {
+  margin: 12px 0 0;
+  font-size: 13.5px; line-height: 1.55;
+  color: var(--ink-2);
+}
+
+/* Source list: two lines, whole row is the link. */
+.src {
+  display: block;
+  padding: 10px 0;
+  border-top: 0.5px solid var(--line);
+  text-decoration: none;
+}
+.sect > .src:first-of-type { border-top: none; padding-top: 0; }
+.src-name { display: block; font-size: 13.5px; color: var(--ink); transition: color .2s; }
+.src-role { display: block; font-size: 11.5px; color: var(--ink-3); margin-top: 2px; }
+.src:hover .src-name { color: var(--accent); }
+
+/* Tile grid for the core finding. Named groups, never a tally. */
+.grid-tiles { display: flex; flex-wrap: wrap; gap: 10px 14px; }
+.grid-cell { display: flex; align-items: center; gap: 7px; font-size: 12.5px; color: var(--ink); }
 
 .chip {
   padding: 5px 13px;
@@ -180,22 +316,28 @@ html, body {
 #graph.intro .node { animation: riseIn .45s ease backwards; }
 #graph.intro .edge { animation: edgeIn .5s ease backwards; }
 
+/* The bottom rail: what the corpus shows on the left, where it came from on
+ * the right. Both quiet, both always on screen, neither competing with the map. */
 .foot {
   flex: none;
-  padding: 10px 34px 14px;
-  font-size: 11px;
-  color: var(--ink-3);
+  padding: 11px 34px 14px;
   display: flex;
-  flex-wrap: wrap;
   align-items: center;
-  gap: 0;
-  line-height: 1.6;
+  justify-content: space-between;
+  gap: 24px;
   border-top: 0.5px solid var(--line);
 }
-.foot a { color: var(--ink-3); text-decoration: none; transition: color .15s; }
-.foot a:hover { color: var(--ink); }
-.foot .sep { margin: 0 8px; color: rgba(237, 237, 237, 0.12); }
-.foot .lead { margin-right: 10px; color: rgba(237, 237, 237, 0.2); font-weight: 500; }
+
+.foot-link {
+  flex: none;
+  border: 0; padding: 0; background: none;
+  font-family: inherit; font-size: 11.5px;
+  color: var(--ink-3);
+  cursor: pointer;
+  border-bottom: 1px solid transparent;
+  transition: color .2s, border-color .2s;
+}
+.foot-link:hover { color: var(--ink); border-bottom-color: var(--line-2); }
 
 /* ---------- tooltip ---------- */
 
@@ -285,19 +427,27 @@ html, body {
   border-bottom: 0.5px solid var(--line);
 }
 
-.panel-head .flow-row { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }
-.panel-head .flow-row:last-child { margin-bottom: 0; }
-.panel-head .flow-row + .flow-row { margin-top: 4px; }
+/* The arrow owns the vertical rhythm, so the gap above the mark and the gap
+ * below it are the same. Anything else here carrying a margin makes the strip
+ * lopsided, which it was: 38px above, 26px below.
+ *
+ * Everything is also centred on one spine at x=24, the middle of the 48px
+ * mark. A 26px tile needs 11px of offset to sit on it, a 10px arrow needs 19,
+ * otherwise the connector does not line up with what it connects. */
+.panel-head .flow-row {
+  display: flex; flex-wrap: wrap; gap: 6px;
+  margin: 0 0 0 11px;
+}
+.panel-head .flow-row + .flow-row { margin-top: 6px; }
 
 .panel-id {
   display: flex;
   align-items: center;
   gap: 14px;
-  margin: 14px 0 0;
+  margin: 0;
 }
-.panel-id:first-child { margin-top: 0; }
 
-.flow-arrow { display: block; width: 10px; height: 14px; margin: 6px 0 6px 2px; }
+.flow-arrow { display: block; width: 10px; height: 14px; margin: 9px 0 9px 19px; }
 
 .panel-mark {
   width: 48px; height: 48px; flex: none; border-radius: 12px;

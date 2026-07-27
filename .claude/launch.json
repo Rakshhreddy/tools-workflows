@@ -6,6 +6,12 @@
       "runtimeExecutable": "python3",
       "runtimeArgs": ["-m", "http.server", "8932"],
       "port": 8932
+    },
+    {
+      "name": "site-claude",
+      "runtimeExecutable": "python3",
+      "runtimeArgs": ["-m", "http.server", "8933"],
+      "port": 8933
     }
   ]
 }
