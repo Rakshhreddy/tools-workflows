@@ -9,6 +9,9 @@ let DATA = null;
 let NODES = [];
 let EDGES = [];
 let MARKS = {};
+// One <g> per tool, built once and reused across every render. Detaching them
+// with innerHTML does not invalidate these references, so the logos survive.
+const TILES = new Map();
 let STAGES = [];
 let company = null;   // level 2
 let person = null;    // level 3
@@ -300,13 +303,12 @@ function render(nodes) {
   const gBands = el('g');
   STAGES.forEach((st, i) => {
     // Faint alternating column fill so the five stages are felt as structure.
+    // Tone, not rules. No dividers between columns, and the fill overshoots the
+    // viewBox so the band has no top or bottom edge to read as a box. A phase
+    // is felt as a change in surface, the way the header is.
     if (i % 2) gBands.appendChild(el('rect', {
-      x: st.x0, y: 20, width: st.w, height: H - 42,
-      fill: 'rgba(237, 237, 237, 0.026)'
-    }));
-    if (i) gBands.appendChild(el('line', {
-      x1: st.x0, y1: 24, x2: st.x0, y2: H - 22,
-      stroke: 'var(--line)', 'stroke-width': '1'
+      x: st.x0, y: -4, width: st.w, height: H + 8,
+      fill: 'rgba(237, 237, 237, 0.032)'
     }));
     // No number on the label. These are phases, not steps, and people enter
     // wherever the work starts. Left to right already carries the flow.
@@ -348,29 +350,39 @@ function render(nodes) {
     gEdges.appendChild(hit);
   });
 
+  // Each tile is built once and kept. Filtering re-appends the same elements
+  // rather than making new ones, because tearing down every <image> and
+  // rebuilding it makes all 24 logos re-decode, and that is the flash you see
+  // when picking a company. Only the transform changes between renders.
   nodes.forEach((n, i) => {
-    const g = el('g', { class: 'node', tabindex: '0', role: 'button', transform: `translate(${n.x},${n.y})` });
-    g.setAttribute('aria-label', `${n.name}, ${stageLabel(n)} stage`);
-    g.style.animationDelay = `${i * 22}ms`;
+    let g = TILES.get(n.id);
+    if (!g) {
+      g = el('g', { class: 'node', tabindex: '0', role: 'button' });
+      g.style.animationDelay = `${i * 22}ms`;   // stagger, for the boot intro only
+      g.setAttribute('aria-label', `${n.name}, ${stageLabel(n)} stage`);
 
-    g.appendChild(el('rect', {
-      class: 'tile', x: -n.r, y: -n.r, width: n.r * 2, height: n.r * 2,
-      rx: n.r * 0.32, filter: 'url(#lift)'
-    }));
-    appendMark(g, n, n.r * 1.16);
+      g.appendChild(el('rect', {
+        class: 'tile', x: -n.r, y: -n.r, width: n.r * 2, height: n.r * 2,
+        rx: n.r * 0.32, filter: 'url(#lift)'
+      }));
+      appendMark(g, n, n.r * 1.16);
 
-    const label = el('text', { class: 'node-label', x: 0, y: n.r + 16 });
-    label.setAttribute('font-size', n.by.length >= 5 ? '12.5' : '11.5');
-    label.textContent = n.name;
-    g.appendChild(label);
+      const label = el('text', { class: 'node-label', x: 0, y: n.r + 16 });
+      label.setAttribute('font-size', n.by.length >= 5 ? '12.5' : '11.5');
+      label.textContent = n.name;
+      g.appendChild(label);
 
-    g.addEventListener('mouseenter', (ev) => { if (!n.dragging) { tipNode(ev, n); focusNode(n); } });
-    g.addEventListener('mousemove', (ev) => { if (!n.dragging) moveTip(ev); });
-    g.addEventListener('mouseleave', () => { hideTip(); clearFocus(); });
-    g.addEventListener('keydown', (ev) => {
-      if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); openPanel(n); }
-    });
-    attachDrag(g, n);
+      g.addEventListener('mouseenter', (ev) => { if (!n.dragging) { tipNode(ev, n); focusNode(n); } });
+      g.addEventListener('mousemove', (ev) => { if (!n.dragging) moveTip(ev); });
+      g.addEventListener('mouseleave', () => { hideTip(); clearFocus(); });
+      g.addEventListener('keydown', (ev) => {
+        if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); openPanel(n); }
+      });
+      attachDrag(g, n);
+      TILES.set(n.id, g);
+    }
+    g.setAttribute('transform', `translate(${n.x},${n.y})`);
+    g.classList.remove('lit');
     n.el = g;
     gNodes.appendChild(g);
   });
@@ -1061,11 +1073,14 @@ async function boot() {
     if (e.key === 'Escape' && document.activeElement !== find) { closePanel(); hideTip(); }
   });
 
+  // Watch the container, not just the window. The viewBox is built from the
+  // container's box, so when the two drift apart the SVG letterboxes and every
+  // band grows a visible top and bottom edge. A window listener alone misses
+  // any layout change that is not a window resize.
   let t;
-  window.addEventListener('resize', () => {
-    clearTimeout(t);
-    t = setTimeout(() => { draw(); syncRail(); }, 180);
-  });
+  const redraw = () => { clearTimeout(t); t = setTimeout(() => { draw(); syncRail(); }, 120); };
+  new ResizeObserver(redraw).observe($('canvasWrap'));
+  window.addEventListener('resize', redraw);
 }
 
 boot();
