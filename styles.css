@@ -10,6 +10,11 @@
  */
 :root {
   --bg: #0f0f0f;
+  /* Chrome sits one quiet step above the canvas. This tonal step is what
+   * separates header and footer from the map, in place of the hairline rules
+   * that used to do it. A drawn line competes with the dotted handoffs, which
+   * are the only lines on this page that carry meaning. */
+  --chrome: #161616;
   --surface: #1a1a1a;
   --surface-2: #242424;
   --tile: #f2f0ec;
@@ -47,54 +52,38 @@ html, body {
 
 /* ---------- header ---------- */
 
-.head { padding: 22px 34px 0; flex: none; }
+.head {
+  flex: none;
+  padding: 18px 34px 14px;
+  background: var(--chrome);
+}
 
 .head-row {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
   gap: 34px;
-  flex-wrap: wrap;
 }
 
-.lede { margin: 0; flex: 0 1 auto; max-width: 52ch; line-height: 1.55; font-size: 14.5px; }
+.head-left { display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+
+.lede { margin: 0; max-width: 52ch; line-height: 1.55; font-size: 14.5px; }
 .title { font-weight: 600; letter-spacing: -0.015em; color: var(--ink); }
 .sub { color: var(--ink-2); }
 
-.head-bottom {
-  display: flex;
-  align-items: center;
-  gap: 18px;
-  margin-top: 16px;
-  padding-bottom: 14px;
-  border-bottom: 0.5px solid var(--line);
-}
-
-/* Stage dots: a subtle geometric decoration hinting at the 5 workflow phases.
- * No labels, no legend — just a quiet visual anchor that ties the header to
- * the canvas columns below. */
-.stage-dots {
-  display: flex;
-  gap: 5px;
-  flex: none;
-}
-.stage-dot {
-  width: 20px; height: 3px;
-  border-radius: 2px;
-  transition: background .3s;
-}
-.stage-dot:nth-child(1) { background: rgba(237, 237, 237, 0.08); }
-.stage-dot:nth-child(2) { background: rgba(237, 237, 237, 0.13); }
-.stage-dot:nth-child(3) { background: rgba(237, 237, 237, 0.20); }
-.stage-dot:nth-child(4) { background: rgba(237, 237, 237, 0.28); }
-.stage-dot:nth-child(5) { background: rgba(237, 237, 237, 0.38); }
-
+/* Exactly one line, in every state, filled or empty. Two lines meant the block
+ * changed shape between companies. flex:none matters: as a column flex item,
+ * flex-basis beats height on the main axis, so `flex: 1` collapses this to nil. */
 .mode {
-  flex: 1;
-  font-size: 12.5px;
-  line-height: 1.5;
+  flex: none;
+  margin: 0;
+  height: 20px;
+  line-height: 20px;
+  font-size: 13px;
   color: var(--ink-2);
-  min-height: 18px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 .mode b { color: var(--ink); font-weight: 600; }
 .mode .role { color: var(--ink-3); }
@@ -102,8 +91,13 @@ html, body {
 /* The rail takes the space the lede does not, and shrinks below its content
  * width rather than wrapping the header onto a second line. min-width:0 is what
  * lets a flex child actually shrink, and it is what makes the scroller engage. */
-.rails { display: flex; flex-direction: column; align-items: flex-end; gap: 8px; flex: 1 1 300px; min-width: 0; }
-.who-sub { display: flex; gap: 6px; flex-wrap: wrap; justify-content: flex-end; }
+.rails { display: flex; flex-direction: column; align-items: flex-end; gap: 10px; flex: 1 1 300px; min-width: 0; }
+/* Height reserved whether or not a company has designers to show, for the same
+ * reason: revealing these must not push the canvas down. */
+.who-sub {
+  display: flex; gap: 6px; flex-wrap: nowrap; justify-content: flex-end;
+  min-height: 24px;
+}
 
 /* ---------- company rail ----------
  * Scrolls rather than wraps, so the header keeps its shape however many
@@ -146,58 +140,6 @@ html, body {
 .rail-arrow[hidden] { display: none; }
 .rail-arrow:hover { border-color: var(--line-2); color: var(--ink); }
 .rail-arrow svg { width: 13px; height: 13px; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
-
-/* ---------- search ---------- */
-
-.find { position: relative; }
-.find-input {
-  width: 232px;
-  padding: 6px 40px 6px 12px;
-  border: 0.5px solid var(--line);
-  border-radius: 100px;
-  background: transparent;
-  font: inherit;
-  font-size: 12.5px;
-  color: var(--ink);
-  transition: border-color .2s, width .2s;
-}
-.find-input::placeholder { color: var(--ink-3); }
-.find-input:focus { outline: none; border-color: var(--line-2); width: 268px; }
-.find-input::-webkit-search-cancel-button { display: none; }
-
-.find-key {
-  position: absolute; top: 50%; right: 11px;
-  transform: translateY(-50%);
-  pointer-events: none;
-  font-family: inherit; font-size: 10px;
-  color: var(--ink-3);
-  letter-spacing: 0.5px;
-}
-.find-input:focus + .find-key { opacity: 0; }
-
-.find-results {
-  position: absolute; z-index: 30;
-  top: calc(100% + 6px); right: 0;
-  width: 268px;
-  padding: 5px;
-  background: var(--surface);
-  border: 0.5px solid var(--line-2);
-  border-radius: 11px;
-  box-shadow: 0 16px 44px rgba(0, 0, 0, .55);
-  max-height: 300px; overflow-y: auto;
-}
-.find-hit {
-  display: block; width: 100%;
-  padding: 7px 9px;
-  border: 0; border-radius: 7px;
-  background: none;
-  font: inherit; font-size: 12.5px;
-  color: var(--ink);
-  text-align: left; cursor: pointer;
-}
-.find-hit[aria-selected="true"], .find-hit:hover { background: var(--surface-2); }
-.find-hint { display: block; font-size: 11px; color: var(--ink-3); margin-top: 1px; }
-.find-empty { margin: 0; padding: 8px 9px; font-size: 12.5px; color: var(--ink-3); }
 
 /* ---------- findings ----------
  * What the corpus shows, as the way in. Quiet by default, because the map is
@@ -325,7 +267,7 @@ html, body {
   align-items: center;
   justify-content: space-between;
   gap: 24px;
-  border-top: 0.5px solid var(--line);
+  background: var(--chrome);
 }
 
 .foot-link {
@@ -562,8 +504,6 @@ span.row-tile { cursor: default; }
   .foot { left: 20px; padding: 10px 20px 14px; }
   .rails { align-items: flex-start; }
   .who, .who-sub { justify-content: flex-start; }
-  .stage-dots { display: none; }
-  .head-bottom { flex-wrap: wrap; gap: 10px; }
 }
 
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }

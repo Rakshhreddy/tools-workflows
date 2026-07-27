@@ -25,18 +25,20 @@
 <div class="app">
   <header class="head">
     <div class="head-row">
-      <p class="lede">
-        <span class="title">How designers actually work with AI.</span>
-        <span class="sub">The tools they use and how they move between them. Pick a company to see one workflow.</span>
-      </p>
+      <!-- The context line sits under the title, in the space the rail column
+           was leaving empty. That reclaims the gap and makes the header's
+           height depend on the rail alone, so it cannot change when you pick
+           a company. -->
+      <div class="head-left">
+        <p class="lede">
+          <span class="title">How designers actually work with AI.</span>
+          <span class="sub">The tools they use and how they move between them. Pick a company to see one workflow.</span>
+        </p>
+        <p class="mode" id="mode"></p>
+      </div>
       <div class="rails">
-        <div class="find">
-          <input class="find-input" id="find" type="search" autocomplete="off" spellcheck="false"
-                 placeholder="Search a company or designer" aria-label="Search companies and designers"
-                 aria-expanded="false" aria-controls="findResults" role="combobox">
-          <kbd class="find-key" aria-hidden="true">&#8984;K</kbd>
-          <div class="find-results" id="findResults" role="listbox" hidden></div>
-        </div>
+        <!-- Search removed for now, to be brought back. It lives in git at
+             commit 0e110f8 if it needs restoring wholesale. -->
         <!-- Rail scrolls rather than wraps, so the header holds its shape as
              companies are added. Arrows stay hidden until it actually overflows. -->
         <div class="who-rail">
@@ -50,16 +52,6 @@
         </div>
         <div class="who-sub" id="whoSub"></div>
       </div>
-    </div>
-    <div class="head-bottom">
-      <div class="stage-dots" aria-hidden="true">
-        <span class="stage-dot" style="--i:0"></span>
-        <span class="stage-dot" style="--i:1"></span>
-        <span class="stage-dot" style="--i:2"></span>
-        <span class="stage-dot" style="--i:3"></span>
-        <span class="stage-dot" style="--i:4"></span>
-      </div>
-      <p class="mode" id="mode"></p>
     </div>
   </header>
 

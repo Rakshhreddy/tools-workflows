@@ -9,10 +9,12 @@ let DATA = null;
 let NODES = [];
 let EDGES = [];
 let MARKS = {};
+// One <g> per tool, built once and reused across every render. Detaching them
+// with innerHTML does not invalidate these references, so the logos survive.
+const TILES = new Map();
 let STAGES = [];
 let company = null;   // level 2
 let person = null;    // level 3
-let SEARCH = [];
 let openTool = null;    // tool panel currently open, so the URL can carry it
 let openFindingId = null;
 let W = 1200, H = 700;
@@ -300,13 +302,12 @@ function render(nodes) {
   const gBands = el('g');
   STAGES.forEach((st, i) => {
     // Faint alternating column fill so the five stages are felt as structure.
+    // Tone, not rules. No dividers between columns, and the fill overshoots the
+    // viewBox so the band has no top or bottom edge to read as a box. A phase
+    // is felt as a change in surface, the way the header is.
     if (i % 2) gBands.appendChild(el('rect', {
-      x: st.x0, y: 20, width: st.w, height: H - 42,
-      fill: 'rgba(237, 237, 237, 0.026)'
-    }));
-    if (i) gBands.appendChild(el('line', {
-      x1: st.x0, y1: 24, x2: st.x0, y2: H - 22,
-      stroke: 'var(--line)', 'stroke-width': '1'
+      x: st.x0, y: -4, width: st.w, height: H + 8,
+      fill: 'rgba(237, 237, 237, 0.032)'
     }));
     // No number on the label. These are phases, not steps, and people enter
     // wherever the work starts. Left to right already carries the flow.
@@ -348,29 +349,39 @@ function render(nodes) {
     gEdges.appendChild(hit);
   });
 
+  // Each tile is built once and kept. Filtering re-appends the same elements
+  // rather than making new ones, because tearing down every <image> and
+  // rebuilding it makes all 24 logos re-decode, and that is the flash you see
+  // when picking a company. Only the transform changes between renders.
   nodes.forEach((n, i) => {
-    const g = el('g', { class: 'node', tabindex: '0', role: 'button', transform: `translate(${n.x},${n.y})` });
-    g.setAttribute('aria-label', `${n.name}, ${stageLabel(n)} stage`);
-    g.style.animationDelay = `${i * 22}ms`;
+    let g = TILES.get(n.id);
+    if (!g) {
+      g = el('g', { class: 'node', tabindex: '0', role: 'button' });
+      g.style.animationDelay = `${i * 22}ms`;   // stagger, for the boot intro only
+      g.setAttribute('aria-label', `${n.name}, ${stageLabel(n)} stage`);
 
-    g.appendChild(el('rect', {
-      class: 'tile', x: -n.r, y: -n.r, width: n.r * 2, height: n.r * 2,
-      rx: n.r * 0.32, filter: 'url(#lift)'
-    }));
-    appendMark(g, n, n.r * 1.16);
+      g.appendChild(el('rect', {
+        class: 'tile', x: -n.r, y: -n.r, width: n.r * 2, height: n.r * 2,
+        rx: n.r * 0.32, filter: 'url(#lift)'
+      }));
+      appendMark(g, n, n.r * 1.16);
 
-    const label = el('text', { class: 'node-label', x: 0, y: n.r + 16 });
-    label.setAttribute('font-size', n.by.length >= 5 ? '12.5' : '11.5');
-    label.textContent = n.name;
-    g.appendChild(label);
+      const label = el('text', { class: 'node-label', x: 0, y: n.r + 16 });
+      label.setAttribute('font-size', n.by.length >= 5 ? '12.5' : '11.5');
+      label.textContent = n.name;
+      g.appendChild(label);
 
-    g.addEventListener('mouseenter', (ev) => { if (!n.dragging) { tipNode(ev, n); focusNode(n); } });
-    g.addEventListener('mousemove', (ev) => { if (!n.dragging) moveTip(ev); });
-    g.addEventListener('mouseleave', () => { hideTip(); clearFocus(); });
-    g.addEventListener('keydown', (ev) => {
-      if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); openPanel(n); }
-    });
-    attachDrag(g, n);
+      g.addEventListener('mouseenter', (ev) => { if (!n.dragging) { tipNode(ev, n); focusNode(n); } });
+      g.addEventListener('mousemove', (ev) => { if (!n.dragging) moveTip(ev); });
+      g.addEventListener('mouseleave', () => { hideTip(); clearFocus(); });
+      g.addEventListener('keydown', (ev) => {
+        if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); openPanel(n); }
+      });
+      attachDrag(g, n);
+      TILES.set(n.id, g);
+    }
+    g.setAttribute('transform', `translate(${n.x},${n.y})`);
+    g.classList.remove('lit');
     n.el = g;
     gNodes.appendChild(g);
   });
@@ -513,10 +524,19 @@ function renderRails() {
   });
 
   syncRail();
-  // Keep the current company visible even when it sits off the end of the rail,
-  // which is how you arrive here from search or a shared link.
+  // Bring the selected company into view only when it is genuinely out of it.
+  // Scrolling on every render moved the rail under the cursor for no reason,
+  // and the padding keeps the selected chip clear of the edge fade instead of
+  // leaving it half faded at the end of the track.
   const active = $('who').querySelector('[aria-pressed="true"]');
-  if (active) active.scrollIntoView({ block: 'nearest', inline: 'center' });
+  if (active) {
+    const box = $('whoScroll').getBoundingClientRect();
+    const chip = active.getBoundingClientRect();
+    const pad = 48;
+    if (chip.left < box.left + pad || chip.right > box.right - pad) {
+      active.scrollIntoView({ block: 'nearest', inline: 'center' });
+    }
+  }
 }
 
 /* ---------- rail ----------
@@ -544,82 +564,26 @@ function pageRail(dir) {
   box.scrollBy({ left: dir * Math.max(160, box.clientWidth * 0.8), behavior: 'smooth' });
 }
 
-/* ---------- search ----------
- * Companies and people share one field. Role is searchable too, so "Head of
- * Design" finds the people it should. */
-
-function searchIndex() {
-  const rows = DATA.companies.map((c) => ({
-    kind: 'company', id: c.id, label: c.name,
-    hint: andList(staffOf(c.id).map((p) => firstName(p.name))),
-    hay: `${c.name} ${c.type} ${staffOf(c.id).map((p) => p.name + ' ' + p.role).join(' ')}`.toLowerCase()
-  }));
-  DATA.designers.forEach((p) => rows.push({
-    kind: 'designer', id: p.id, label: p.name,
-    hint: `${p.role}, ${firmOf(p.id).name}`,
-    hay: `${p.name} ${p.role} ${firmOf(p.id).name}`.toLowerCase()
-  }));
-  return rows;
-}
-
-function runSearch(term) {
-  const box = $('findResults');
-  const q = term.trim().toLowerCase();
-  if (!q) { box.hidden = true; box.innerHTML = ''; $('find').setAttribute('aria-expanded', 'false'); return; }
-
-  // Prefix matches on the label first, then anything else that contains it.
-  const hits = SEARCH.filter((r) => r.hay.includes(q)).sort((a, b) => {
-    const ap = a.label.toLowerCase().startsWith(q) ? 0 : 1;
-    const bp = b.label.toLowerCase().startsWith(q) ? 0 : 1;
-    return ap - bp || a.kind.localeCompare(b.kind) || a.label.localeCompare(b.label);
-  }).slice(0, 8);
-
-  box.innerHTML = hits.length
-    ? hits.map((r, i) => `<button class="find-hit" role="option" aria-selected="${i === 0}" ` +
-        `data-kind="${r.kind}" data-id="${r.id}">${r.label}` +
-        `<span class="find-hint">${r.hint}</span></button>`).join('')
-    : `<p class="find-empty">Nothing matches that.</p>`;
-  box.hidden = false;
-  $('find').setAttribute('aria-expanded', 'true');
-}
-
-function closeSearch(clear) {
-  $('findResults').hidden = true;
-  $('find').setAttribute('aria-expanded', 'false');
-  if (clear) $('find').value = '';
-}
-
-function takeHit(el) {
-  if (!el) return;
-  if (el.dataset.kind === 'company') selectCompany(el.dataset.id, { toggle: false });
-  else selectPerson(el.dataset.id);
-  closeSearch(true);
-  $('find').blur();
-}
-
+/* One line, always, in every state. It names what is selected and stops there:
+ * the thesis used to live here too, which made it wrap to two lines for some
+ * companies and one for others, so the header never looked the same twice.
+ * The thesis is in Sources and in the panel, where there is room for it. */
 function renderSummary() {
   const el2 = $('mode');
+  const line = (lead, rest) => `<b>${lead}</b><span class="role">${rest}</span>`;
+
   if (person) {
     const p = who(person);
-    el2.innerHTML = `<b>${p.name}</b><span class="role">, ${p.role} at ${firmOf(person).name}.</span> ${p.thesis}`;
-    el2.classList.add('has-content');
-    return;
-  }
-  if (company) {
+    el2.innerHTML = line(p.name, ` &middot; ${p.role} at ${firmOf(person).name}`);
+  } else if (company) {
     const c = byId(DATA.companies, company);
     const staff = staffOf(company);
-    if (staff.length === 1) {
-      const p = staff[0];
-      el2.innerHTML = `<b>${c.name}</b><span class="role">, ${p.name}, ${p.role}.</span> ${p.thesis}`;
-    } else {
-      const names = andList(staff.map((p) => p.name));
-      el2.innerHTML = `<b>${c.name}</b><span class="role">, ${names}.</span> Pick one to see their workflow.`;
-    }
-    el2.classList.add('has-content');
-    return;
+    el2.innerHTML = staff.length === 1
+      ? line(c.name, ` &middot; ${staff[0].name}, ${staff[0].role}`)
+      : line(c.name, ` &middot; ${andList(staff.map((p) => p.name))}`);
+  } else {
+    el2.innerHTML = '';
   }
-  el2.innerHTML = '';
-  el2.classList.remove('has-content');
 }
 
 /* ---------- tooltip ---------- */
@@ -980,7 +944,6 @@ async function boot() {
 
   await loadMarks(NODES.map((n) => n.id));
 
-  SEARCH = searchIndex();
   renderFindings();
   const { tool, finding } = readURL();
 
@@ -1007,30 +970,6 @@ async function boot() {
   $('railNext').addEventListener('click', () => pageRail(1));
   $('whoScroll').addEventListener('scroll', syncRail, { passive: true });
 
-  /* search */
-  const find = $('find');
-  find.addEventListener('input', () => runSearch(find.value));
-  find.addEventListener('focus', () => { if (find.value) runSearch(find.value); });
-  find.addEventListener('keydown', (e) => {
-    const hits = [...$('findResults').querySelectorAll('.find-hit')];
-    if (e.key === 'Enter') { e.preventDefault(); takeHit(hits.find((h) => h.getAttribute('aria-selected') === 'true') || hits[0]); return; }
-    if (e.key === 'Escape') { e.preventDefault(); closeSearch(true); find.blur(); return; }
-    if (e.key !== 'ArrowDown' && e.key !== 'ArrowUp') return;
-    e.preventDefault();
-    if (!hits.length) return;
-    const at = hits.findIndex((h) => h.getAttribute('aria-selected') === 'true');
-    const next = (at + (e.key === 'ArrowDown' ? 1 : -1) + hits.length) % hits.length;
-    hits.forEach((h, i) => h.setAttribute('aria-selected', String(i === next)));
-    hits[next].scrollIntoView({ block: 'nearest' });
-  });
-  $('findResults').addEventListener('mousedown', (e) => {
-    e.preventDefault();               // keep focus so blur does not race the click
-    takeHit(e.target.closest('.find-hit'));
-  });
-  document.addEventListener('click', (e) => {
-    if (!e.target.closest('.find')) closeSearch(false);
-  });
-
   // Every tile in the panel is a way through the graph, so the panel browses
   // like the canvas does.
   $('panelBody').addEventListener('click', (ev) => {
@@ -1049,23 +988,20 @@ async function boot() {
     more.textContent = open ? 'Show less' : 'Show all';
   });
 
-  // Cmd+K focuses search. It previously closed the panel, which meant a
-  // browser shortcut was swallowed to do something unrelated to searching.
+  // Cmd+K is left alone now that search is gone. It used to be intercepted to
+  // close the panel, which is not what anyone presses it for.
   document.addEventListener('keydown', (e) => {
-    if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
-      e.preventDefault();
-      find.focus();
-      find.select();
-      return;
-    }
-    if (e.key === 'Escape' && document.activeElement !== find) { closePanel(); hideTip(); }
+    if (e.key === 'Escape') { closePanel(); hideTip(); }
   });
 
+  // Watch the container, not just the window. The viewBox is built from the
+  // container's box, so when the two drift apart the SVG letterboxes and every
+  // band grows a visible top and bottom edge. A window listener alone misses
+  // any layout change that is not a window resize.
   let t;
-  window.addEventListener('resize', () => {
-    clearTimeout(t);
-    t = setTimeout(() => { draw(); syncRail(); }, 180);
-  });
+  const redraw = () => { clearTimeout(t); t = setTimeout(() => { draw(); syncRail(); }, 120); };
+  new ResizeObserver(redraw).observe($('canvasWrap'));
+  window.addEventListener('resize', redraw);
 }
 
 boot();
