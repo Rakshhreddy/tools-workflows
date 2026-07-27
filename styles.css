@@ -427,19 +427,27 @@ html, body {
   border-bottom: 0.5px solid var(--line);
 }
 
-.panel-head .flow-row { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }
-.panel-head .flow-row:last-child { margin-bottom: 0; }
-.panel-head .flow-row + .flow-row { margin-top: 4px; }
+/* The arrow owns the vertical rhythm, so the gap above the mark and the gap
+ * below it are the same. Anything else here carrying a margin makes the strip
+ * lopsided, which it was: 38px above, 26px below.
+ *
+ * Everything is also centred on one spine at x=24, the middle of the 48px
+ * mark. A 26px tile needs 11px of offset to sit on it, a 10px arrow needs 19,
+ * otherwise the connector does not line up with what it connects. */
+.panel-head .flow-row {
+  display: flex; flex-wrap: wrap; gap: 6px;
+  margin: 0 0 0 11px;
+}
+.panel-head .flow-row + .flow-row { margin-top: 6px; }
 
 .panel-id {
   display: flex;
   align-items: center;
   gap: 14px;
-  margin: 14px 0 0;
+  margin: 0;
 }
-.panel-id:first-child { margin-top: 0; }
 
-.flow-arrow { display: block; width: 10px; height: 14px; margin: 6px 0 6px 2px; }
+.flow-arrow { display: block; width: 10px; height: 14px; margin: 9px 0 9px 19px; }
 
 .panel-mark {
   width: 48px; height: 48px; flex: none; border-radius: 12px;
