@@ -61,8 +61,6 @@
       </div>
       <p class="mode" id="mode"></p>
     </div>
-    <!-- What the corpus shows, as the way in. Each one opens its own receipts. -->
-    <div class="findings" id="findings"></div>
   </header>
 
   <main class="canvas-wrap" id="canvasWrap">
@@ -72,7 +70,12 @@
     <div class="tip" id="tip" hidden></div>
   </main>
 
-  <footer class="foot" id="footNote"></footer>
+  <!-- The bottom rail is the quiet half of the interface: what the corpus
+       shows, and where it came from. Both open in the same panel. -->
+  <footer class="foot">
+    <div class="findings" id="findings"></div>
+    <button class="foot-link" id="sourcesBtn" type="button">Sources</button>
+  </footer>
 </div>
 
 <div class="panel-backdrop" id="panelBackdrop" hidden>

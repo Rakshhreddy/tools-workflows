@@ -203,16 +203,13 @@ html, body {
  * What the corpus shows, as the way in. Quiet by default, because the map is
  * still the thing; they read as a line of claims, not as buttons. */
 
-.findings {
-  display: flex; flex-wrap: wrap; gap: 0 22px;
-  padding: 11px 0 13px;
-  border-bottom: 0.5px solid var(--line);
-}
+.findings { display: flex; align-items: center; gap: 0 20px; min-width: 0; flex-wrap: wrap; }
 .finding {
   border: 0; padding: 0; background: none;
-  font: inherit; font-size: 12.5px;
-  color: var(--ink-2);
+  font-family: inherit; font-size: 11.5px;
+  color: var(--ink-3);
   cursor: pointer;
+  white-space: nowrap;
   border-bottom: 1px solid transparent;
   transition: color .2s, border-color .2s;
 }
@@ -307,22 +304,28 @@ html, body {
 #graph.intro .node { animation: riseIn .45s ease backwards; }
 #graph.intro .edge { animation: edgeIn .5s ease backwards; }
 
+/* The bottom rail: what the corpus shows on the left, where it came from on
+ * the right. Both quiet, both always on screen, neither competing with the map. */
 .foot {
   flex: none;
-  padding: 10px 34px 14px;
-  font-size: 11px;
-  color: var(--ink-3);
+  padding: 11px 34px 14px;
   display: flex;
-  flex-wrap: wrap;
   align-items: center;
-  gap: 0;
-  line-height: 1.6;
+  justify-content: space-between;
+  gap: 24px;
   border-top: 0.5px solid var(--line);
 }
-.foot a { color: var(--ink-3); text-decoration: none; transition: color .15s; }
-.foot a:hover { color: var(--ink); }
-.foot .sep { margin: 0 8px; color: rgba(237, 237, 237, 0.12); }
-.foot .lead { margin-right: 10px; color: rgba(237, 237, 237, 0.2); font-weight: 500; }
+
+.foot-link {
+  flex: none;
+  border: 0; padding: 0; background: none;
+  font-family: inherit; font-size: 11.5px;
+  color: var(--ink-3);
+  cursor: pointer;
+  border-bottom: 1px solid transparent;
+  transition: color .2s, border-color .2s;
+}
+.foot-link:hover { color: var(--ink); border-bottom-color: var(--line-2); }
 
 /* ---------- tooltip ---------- */
 

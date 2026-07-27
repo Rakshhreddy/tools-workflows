@@ -811,7 +811,7 @@ function closePanel() {
  * carrying the sharpest material in the project and neither was reachable. */
 
 const FINDINGS = [
-  { id: 'core', label: 'The shared core, and the long tail',
+  { id: 'core', label: 'The shared core',
     blurb: 'A handful of tools recur across the corpus. Everything else belongs to one person.' },
   { id: 'handoff', label: 'How the work leaves the designer',
     blurb: 'The artifact people hand over is disappearing.' },
@@ -826,18 +826,14 @@ function findingCore() {
   const half = DATA.designers.length / 2;
   const sorted = [...NODES].sort((a, b) => b.by.length - a.by.length || a.name.localeCompare(b.name));
   const core = sorted.filter((n) => n.by.length >= half);
-  const tail = sorted.filter((n) => n.by.length === 1);
 
-  // Named groups of tiles, no tallies. The shape of the split is the point,
-  // and it stays legible however the corpus grows.
-  const group = (list) => `<div class="grid-tiles">` + list.map((n) =>
-    `<span class="grid-cell">${toolTile(n, 'row-tile')}<span>${n.name}</span></span>`).join('') + `</div>`;
-
-  let html = `<div class="sect"><h3 class="micro">Reached for by most designers</h3>` +
-    (core.length ? group(core) : `<p class="empty">Nothing is shared that widely.</p>`) + `</div>`;
-  html += `<div class="sect"><h3 class="micro">Reached for by one designer only</h3>` +
-    (tail.length ? group(tail) : `<p class="empty">Every tool here is shared.</p>`) + `</div>`;
-  return html;
+  // Only the core is drawn. The long tail is ten more tiles saying nothing the
+  // blurb has not already said, and it turned the panel into a wall of logos.
+  const tiles = core.length
+    ? `<div class="grid-tiles">` + core.map((n) =>
+        `<span class="grid-cell">${toolTile(n, 'row-tile')}<span>${n.name}</span></span>`).join('') + `</div>`
+    : `<p class="empty">Nothing is shared that widely.</p>`;
+  return `<div class="sect">${tiles}</div>`;
 }
 
 function findingHandoff() {
@@ -896,6 +892,26 @@ function openFinding(id) {
   $('panelBackdrop').hidden = false;
   openFindingId = id; openTool = null;
   writeURL();
+}
+
+/* Ten names spelled out along the bottom was noise on every screen. Behind one
+ * word they become worth reading: who each person is, and what they argue. */
+function openSources() {
+  const rows = DATA.designers.map((p) =>
+    `<div class="item"><p class="item-name">${p.name}</p><p>${p.thesis}</p>` +
+    `<div class="by">${p.role}, ${firmOf(p.id).name} &middot; ` +
+    `<a href="${p.source.url}" target="_blank" rel="noopener">${p.source.show}</a></div></div>`
+  ).join('');
+
+  $('panelBody').innerHTML =
+    `<div class="panel-head"><div class="panel-id finding-id">` +
+    `<div><h2>Sources</h2><p class="kind micro">Primary interviews</p></div></div>` +
+    `<p class="finding-blurb">Every claim on the map is quoted from one of these ` +
+    `walkthroughs and timestamped to the moment it was said.</p></div>` +
+    `<div class="sect">${rows}</div>`;
+  $('panelBody').scrollTop = 0;
+  $('panelBackdrop').hidden = false;
+  openTool = null; openFindingId = null;
 }
 
 function renderFindings() {
@@ -965,11 +981,6 @@ async function boot() {
 
   await loadMarks(NODES.map((n) => n.id));
 
-  $('footNote').innerHTML = `<span class="lead">From interviews with</span>` +
-    DATA.designers.map((p) =>
-      `<a href="${p.source.url}" target="_blank" rel="noopener">${p.name}</a>`
-    ).join('<span class="sep">/</span>');
-
   SEARCH = searchIndex();
   renderFindings();
   const { tool, finding } = readURL();
@@ -990,6 +1001,7 @@ async function boot() {
     const b = e.target.closest('[data-finding]');
     if (b) openFinding(b.dataset.finding);
   });
+  $('sourcesBtn').addEventListener('click', openSources);
 
   /* rail */
   $('railPrev').addEventListener('click', () => pageRail(-1));
