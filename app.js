@@ -894,21 +894,20 @@ function openFinding(id) {
   writeURL();
 }
 
-/* Ten names spelled out along the bottom was noise on every screen. Behind one
- * word they become worth reading: who each person is, and what they argue. */
+/* A list of sources, not a digest of everyone's philosophy. Two lines each and
+ * the whole row is the link. The thesis already appears in the mode line when
+ * you pick that designer, so repeating it here was the third line doing nothing. */
 function openSources() {
   const rows = DATA.designers.map((p) =>
-    `<div class="item"><p class="item-name">${p.name}</p><p>${p.thesis}</p>` +
-    `<div class="by">${p.role}, ${firmOf(p.id).name} &middot; ` +
-    `<a href="${p.source.url}" target="_blank" rel="noopener">${p.source.show}</a></div></div>`
+    `<a class="src" href="${p.source.url}" target="_blank" rel="noopener">` +
+    `<span class="src-name">${p.name}</span>` +
+    `<span class="src-role">${p.role}, ${firmOf(p.id).name}</span></a>`
   ).join('');
 
   $('panelBody').innerHTML =
-    `<div class="panel-head"><div class="panel-id finding-id">` +
-    `<div><h2>Sources</h2><p class="kind micro">Primary interviews</p></div></div>` +
+    `<div class="panel-head"><div class="panel-id finding-id"><div><h2>Sources</h2></div></div>` +
     `<p class="finding-blurb">Every claim on the map is quoted from one of these ` +
-    `walkthroughs and timestamped to the moment it was said.</p></div>` +
-    `<div class="sect">${rows}</div>`;
+    `interviews and timestamped.</p></div><div class="sect">${rows}</div>`;
   $('panelBody').scrollTop = 0;
   $('panelBackdrop').hidden = false;
   openTool = null; openFindingId = null;
